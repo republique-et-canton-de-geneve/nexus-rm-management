@@ -10,13 +10,13 @@
     </parent>
 
     <groupId>ch.ge.cti.nexus</groupId>
-    <artifactId>nexus-rm-gui</artifactId>
+    <artifactId>nexus-rm-management</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <scm>
-        <connection>scm:git:***REMOVED***/6799-nexus-rm-gui.git</connection>
-        <developerConnection>scm:git:***REMOVED***/6799-nexus-rm-gui.git</developerConnection>
-        <url>***REMOVED***/6799-nexus-rm-gui.git</url>
+        <connection>scm:git:***REMOVED***/6799-nexus-rm-management.git</connection>
+        <developerConnection>scm:git:***REMOVED***/6799-nexus-rm-management.git</developerConnection>
+        <url>***REMOVED***/6799-nexus-rm-management.git</url>
         <tag>HEAD</tag>
     </scm>
 
