@@ -1,0 +1,23 @@
+# Fichier de configuration pour l'application. Sert :
+# - en mode "mvn spring-boot:run"
+# - en mode Tomcat, avec ecrasement de certaines valeurs par GoCD
+# necessaire, sinon erreur "PKIX path building failed" a la connexion HTTPS a FormServices
+app:
+  security:
+    token: blabla
+
+javax:
+  net:
+    ssl:
+      trustStore: classpath:security/***REMOVED***.jks
+      trustStorePassword: ***REMOVED***
+
+logging:
+  level:
+    root: INFO
+#    org.springframework.security: DEBUG
+#    org.springframework.web: DEBUG
+
+spring:
+  main:
+    banner-mode: log
