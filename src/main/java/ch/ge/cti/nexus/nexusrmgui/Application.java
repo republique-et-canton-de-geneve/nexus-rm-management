@@ -15,15 +15,18 @@ public class Application implements CommandLineRunner {
     @Resource
     ApplicationContext applicationContext;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        if (args.length < 1 || args.length > 2) {
+            System.out.println("Usage: java Main <nexusUrl> [authenticator]");
+            return;
+        }
         SpringApplication.run(Application.class, args);
     }
 
     @Override
     public void run(String... args) throws InterruptedException {
         var certificateService = applicationContext.getBean(CertificateService.class);
-        var val = certificateService.givePipo();
-        log.info("Valeur obtenue : {}", val);
+        certificateService.montreCertificatsEchus();
     }
 
 }

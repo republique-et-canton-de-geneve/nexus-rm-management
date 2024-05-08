@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
 /**
  * Gestion des certificats TLS des depots.
  */
@@ -11,12 +13,12 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class CertificateService {
 
-    @Value("${app.pipo}")
-    String pipo;
+    @Resource
+    private NexusAccessService nexusAccessService;
 
-    // temp
-    public String givePipo() {
-        return pipo;
+    public void montreCertificatsEchus() {
+        String certifsEnVrac = nexusAccessService.getCertificats();
+        log.info(certifsEnVrac);
     }
 
 }
