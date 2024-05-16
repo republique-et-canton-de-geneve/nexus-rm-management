@@ -26,7 +26,7 @@ public class Application implements CommandLineRunner {
     @Override
     public void run(String... args) throws InterruptedException {
         var certificateService = applicationContext.getBean(CertificateService.class);
-        certificateService.montreCertificatsEchus();
+        certificateService.montrerCertificatsEchus();
     }
 
 }

@@ -36,28 +36,42 @@ public class WebClientProvider {
 
     private WebClient webClient;
 
-    @Value("${app.formservices.url}")
-    private String formServicesUrl;
-
-    @Value("${app.formservices.response-timeout-milliseconds}")
-    private int responseTimeout;
-
-    @Value("${app.formservices.connection-timeout-milliseconds}")
-    private int connectionTimeout;
-
-    @Value("${javax.net.ssl.trustStore}")
-    private String trustStorePath;
-
-    @Value("${javax.net.ssl.trustStorePassword}")
-    private String trustStorePassword;
-
+//    @Value("${app.formservices.url}")
+//    private String formServicesUrl;
+//
+//    @Value("${app.formservices.response-timeout-milliseconds}")
+//    private int responseTimeout;
+//
+//    @Value("${app.formservices.connection-timeout-milliseconds}")
+//    private int connectionTimeout;
+//
+//    @Value("${javax.net.ssl.trustStore}")
+//    private String trustStorePath;
+//
+//    @Value("${javax.net.ssl.trustStorePassword}")
+//    private String trustStorePassword;
+//
+//    @Value("${app.formservices.ssl.enabled}")
+//    private boolean sslEnabled;
 
     public WebClientProvider(
+
+            @Value("${app.formservices.url}")
             String formServicesUrl,
+
+            @Value("${app.formservices.response-timeout-milliseconds}")
             int responseTimeout,
+
+            @Value("${app.formservices.connection-timeout-milliseconds}")
             int connectionTimeout,
+
+            @Value("${javax.net.ssl.trustStore}")
             String trustStorePath,       // inutile si sslEnabled = false
+
+            @Value("${javax.net.ssl.trustStorePassword}")
             String trustStorePassword,   // inutile si sslEnabled = false
+
+            @Value("${app.formservices.ssl.enabled}")
             boolean sslEnabled
     )
             throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException

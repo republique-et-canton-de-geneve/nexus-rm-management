@@ -4,19 +4,7 @@
 # necessaire, sinon erreur "PKIX path building failed" a la connexion HTTPS a FormServices
 app:
   security:
-    token: ***REMOVED***
-
-  formservices:
-
-    url: ***REMOVED***/service
-
-    connection-timeout-milliseconds: 5000
-
-    response-timeout-milliseconds: 5000
-
-    ssl:
-      enabled: true
-
+    token: TOKEN
 
 javax:
   net:
