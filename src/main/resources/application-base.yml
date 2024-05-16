@@ -1,7 +1,7 @@
 # Fichier de configuration pour l'application. Sert :
 # - en mode "mvn spring-boot:run"
 # - en mode Tomcat, avec ecrasement de certaines valeurs par GoCD
-# necessaire, sinon erreur "PKIX path building failed" a la connexion HTTPS a FormServices
+# necessairee, sinon erreur "PKIX path building failed" a la connexion HTTPS a FormServices
 app:
   security:
     token: TOKEN
