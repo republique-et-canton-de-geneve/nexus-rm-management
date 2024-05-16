@@ -1,10 +1,22 @@
 # Fichier de configuration pour l'application. Sert :
 # - en mode "mvn spring-boot:run"
 # - en mode Tomcat, avec ecrasement de certaines valeurs par GoCD
-# necessairee, sinon erreur "PKIX path building failed" a la connexion HTTPS a FormServices
+# necessaire, sinon erreur "PKIX path building failed" a la connexion HTTPS a FormServices
 app:
   security:
-    token: TOKEN
+    token: TOKEN_BASE64
+
+  formservices:
+
+    url: ***REMOVED***/service/rest/v1
+
+    connection-timeout-milliseconds: 5000
+
+    response-timeout-milliseconds: 5000
+
+    ssl:
+      enabled: true
+
 
 javax:
   net:

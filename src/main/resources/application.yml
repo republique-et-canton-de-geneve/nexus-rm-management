@@ -8,7 +8,7 @@ app:
 
   formservices:
 
-    url: ***REMOVED***/service
+    url: ***REMOVED***/service/rest/v1
 
     connection-timeout-milliseconds: 5000
 

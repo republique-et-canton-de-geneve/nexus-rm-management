@@ -1,6 +1,7 @@
 package ch.ge.cti.nexus.nexusrmgui;
 
 import ch.ge.cti.nexus.nexusrmgui.business.CertificateService;
+import ch.ge.cti.nexus.nexusrmgui.business.UserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -16,18 +17,29 @@ public class Application implements CommandLineRunner {
     ApplicationContext applicationContext;
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 1 || args.length > 2) {
-            System.out.println("Usage: java Main <nexusUrl> [authenticator]");
-            return;
-        }
+
         SpringApplication.run(Application.class, args);
     }
 
     @Override
     public void run(String... args) throws InterruptedException {
-        var certificateService = applicationContext.getBean(CertificateService.class);
-        certificateService.montrerCertificatsEchus();
-        
-    }
+        if (args.length > 0) {
+            String option = args[0];
 
+            switch (option) {
+                case "certificate", "1":
+                    var certificateService = applicationContext.getBean(CertificateService.class);
+                    certificateService.montrerCertificatsEchus();
+                    break;
+                case "user", "2":
+                    var userService = applicationContext.getBean(UserService.class);
+                    userService.montrerUsers();
+                    break;
+                default:
+                    System.out.println("Invalid option. Use 'user' or '2' for users, 'certificate' or '1' for certificates.");
+            }
+        } else {
+            System.out.println("No arguments provided. Use 'user' or '2' for users, 'certificate' or '1' for certificates.");
+        }
+    }
 }
