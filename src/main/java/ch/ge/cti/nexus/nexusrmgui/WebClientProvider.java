@@ -36,23 +36,6 @@ public class WebClientProvider {
 
     private WebClient webClient;
 
-//    @Value("${app.formservices.url}")
-//    private String formServicesUrl;
-//
-//    @Value("${app.formservices.response-timeout-milliseconds}")
-//    private int responseTimeout;
-//
-//    @Value("${app.formservices.connection-timeout-milliseconds}")
-//    private int connectionTimeout;
-//
-//    @Value("${javax.net.ssl.trustStore}")
-//    private String trustStorePath;
-//
-//    @Value("${javax.net.ssl.trustStorePassword}")
-//    private String trustStorePassword;
-//
-//    @Value("${app.formservices.ssl.enabled}")
-//    private boolean sslEnabled;
 
     public WebClientProvider(
 

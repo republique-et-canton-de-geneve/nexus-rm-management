@@ -1,7 +1,7 @@
 package ch.ge.cti.nexus.nexusrmgui;
 
 import ch.ge.cti.nexus.nexusrmgui.business.CertificateService;
-import ch.ge.cti.nexus.nexusrmgui.business.UserService;
+import ch.ge.cti.nexus.nexusrmgui.business.ComponentService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -9,7 +9,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
-@SpringBootApplication(scanBasePackages = { "ch.ge.cti.nexus.nexusrmgui" })
+@SpringBootApplication
 @Slf4j
 public class Application implements CommandLineRunner {
 
@@ -32,8 +32,8 @@ public class Application implements CommandLineRunner {
                     certificateService.montrerCertificatsEchus();
                     break;
                 case "user", "2":
-                    var userService = applicationContext.getBean(UserService.class);
-                    userService.montrerUsers();
+                    var userService = applicationContext.getBean(ComponentService.class);
+                    userService.montrerComponents();
                     break;
                 default:
                     System.out.println("Invalid option. Use 'user' or '2' for users, 'certificate' or '1' for certificates.");

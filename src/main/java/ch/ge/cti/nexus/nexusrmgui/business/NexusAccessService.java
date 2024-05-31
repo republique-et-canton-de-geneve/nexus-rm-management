@@ -58,17 +58,16 @@ public class NexusAccessService {
      * Note : dans FormServices, il faut que le role utilise' ait le droit "Archiver" et pas seulement le droit "Voir".
      * @return une chaine de caracteres contentant un &lt;dataStore&gt; et ses sous-elements
      */
-    public String getCertificats() {
+    public Certificate[] getCertificats() {
         try {
             var uri = "/security/ssl/truststore";
-            val method = GET;
             return webClientProvider.getWebClient()
-                    .method(method)
+                    .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
                     .header("Authorization", "Basic " + token)
                     .retrieve()
-                    .bodyToMono(String.class)
+                    .bodyToMono(Certificate[].class)
                     .block();
         } catch (RuntimeException e) {
             handleInvocationError(e);
@@ -78,9 +77,9 @@ public class NexusAccessService {
 /******************************************************************************************************************************
 *           !!! Temporaire !!! Classe a supprimer (utiliser pour le moment afin d'essayer le switch dans Application.java).
 ******************************************************************************************************************************/
-    public String getUsers() {
+    public String getComponents() {
         try {
-            var uri = "/security/users";
+            var uri = "/components?repository=project_release";
             val method = GET;
             return webClientProvider.getWebClient()
                     .method(method)

@@ -18,3 +18,4 @@ logs/
 .scannerwork/
 
 output/
+src/main/resources/application.yml
