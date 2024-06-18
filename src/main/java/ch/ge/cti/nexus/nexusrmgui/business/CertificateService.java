@@ -28,7 +28,7 @@ public class CertificateService {
             List<Certificate> relevantCertificates = Arrays.stream(certificates)
                     .filter(cert -> cert.getExpiresOn() <= System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L) // Filter to get certificates that are expired or will expire in a week or less
                     .sorted((cert1, cert2) -> Long.compare(cert2.getExpiresOn(), cert1.getExpiresOn())) // Sort from most recent to oldest
-                    .collect(Collectors.toList());
+                    .toList();
 
             writeCertificatesToExcel(relevantCertificates);
         } catch (Exception e) {
@@ -139,8 +139,8 @@ public class CertificateService {
     private CellStyle getExpiresOnStyle(long expiresOn, CellStyle redStyle, CellStyle orangeStyle, CellStyle yellowStyle) {
         long currentTime = System.currentTimeMillis();
         long diff = expiresOn - currentTime;
-        long weekInMillis = 7 * 24 * 60 * 60 * 1000L;
-        long fourDaysInMillis = 4 * 24 * 60 * 60 * 1000L;
+        long weekInMillis = 7 * 24 * 60 * 60 * 1000;
+        long fourDaysInMillis = 4 * 24 * 60 * 60 * 1000;
 
         if (expiresOn <= currentTime) {
             return redStyle; // Already expired
