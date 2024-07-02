@@ -31,6 +31,10 @@ import javax.annotation.Resource;
 //import static ch.ge.ael.integration.v1.business.http.Header.GINA_ROLES;
 //import static ch.ge.ael.integration.v1.business.http.Header.GINAUSER;
 //import static ch.ge.ael.integration.v1.business.util.Utils.NB_DEMANDES_PAR_PAGE;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -60,7 +64,7 @@ public class NexusAccessService {
      */
     public Certificate[] getCertificats() {
         try {
-            var uri = "/security/ssl/truststore";
+            var uri = "/v1/security/ssl/truststore";
             return webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
@@ -77,21 +81,25 @@ public class NexusAccessService {
 /******************************************************************************************************************************
 *           !!! Temporaire !!! Classe a supprimer (utiliser pour le moment afin d'essayer le switch dans Application.java).
 ******************************************************************************************************************************/
-    public String getComponents() {
+    public List<Component> getComponents() {
         try {
-            var uri = "/components?repository=project_release";
-            val method = GET;
-            return webClientProvider.getWebClient()
-                    .method(method)
+            var uri = "/v1/components?repository=project_release";
+            log.info("Request URL: " + uri);
+
+            ComponentResponse response = webClientProvider.getWebClient()
+                    .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
                     .header("Authorization", "Basic " + token)
                     .retrieve()
-                    .bodyToMono(String.class)
+                    .bodyToMono(ComponentResponse.class)
                     .block();
+
+            return response != null ? response.getItems() : Collections.emptyList();
         } catch (RuntimeException e) {
+            log.error("Error during the call to get components: ", e);
             handleInvocationError(e);
-            return null;
+            return Collections.emptyList();
         }
     }
 

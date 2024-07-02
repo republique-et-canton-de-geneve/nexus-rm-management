@@ -31,7 +31,7 @@ public class Application implements CommandLineRunner {
                     var certificateService = applicationContext.getBean(CertificateService.class);
                     certificateService.montrerCertificatsEchus();
                     break;
-                case "user", "2":
+                case "component", "2":
                     var userService = applicationContext.getBean(ComponentService.class);
                     userService.montrerComponents();
                     break;

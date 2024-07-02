@@ -8,11 +8,11 @@ app:
 
   formservices:
 
-    url: ***REMOVED***/service/rest/v1
+    url: ***REMOVED***/service/rest
 
     connection-timeout-milliseconds: 5000
 
-    response-timeout-milliseconds: 5000
+    response-timeout-milliseconds: 30000
 
     ssl:
       enabled: true
