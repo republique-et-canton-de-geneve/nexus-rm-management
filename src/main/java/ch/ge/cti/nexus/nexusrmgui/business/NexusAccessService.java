@@ -31,7 +31,9 @@ import javax.annotation.Resource;
 //import static ch.ge.ael.integration.v1.business.http.Header.GINA_ROLES;
 //import static ch.ge.ael.integration.v1.business.http.Header.GINAUSER;
 //import static ch.ge.ael.integration.v1.business.util.Utils.NB_DEMANDES_PAR_PAGE;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +52,9 @@ public class NexusAccessService {
 
     @Value("${app.security.token}")
     private String token;
+
+    @Value("${app.formservices.minimum-size-file}")
+    private int minSize;
 
     /**
      * Fournisseur d'un WebClient (client d'acces non bloquant) vers le serveur FormServices.
@@ -81,12 +86,40 @@ public class NexusAccessService {
 /******************************************************************************************************************************
 *           !!! Temporaire !!! Classe a supprimer (utiliser pour le moment afin d'essayer le switch dans Application.java).
 ******************************************************************************************************************************/
-    public List<Component> getComponents() {
+public List<Component> getComponents() {
+    List<Component> allComponents = new ArrayList<>();
+    String continuationToken = null;
+
+    do {
+        ComponentResponse response = fetchComponents(continuationToken);
+        if (response != null && response.getItems() != null) {
+            allComponents.addAll(response.getItems().stream()
+                    .peek(component -> component.setAssets(
+                            component.getAssets().stream()
+                                    .filter(asset -> asset.getFileSize() >= minSize)
+                                    .sorted(Comparator.comparingLong(Asset::getFileSize).reversed()) //
+                                    .collect(Collectors.toList())
+                    ))
+                    .filter(component -> !component.getAssets().isEmpty())
+                    .toList());
+            continuationToken = response.getContinuationToken();
+        } else {
+            continuationToken = null;
+        }
+    } while (continuationToken != null);
+
+    return allComponents;
+}
+
+    private ComponentResponse fetchComponents(String continuationToken) {
         try {
             var uri = "/v1/components?repository=project_release";
+            if (continuationToken != null && !continuationToken.isEmpty()) {
+                uri += "&continuationToken=" + continuationToken;
+            }
             log.info("Request URL: " + uri);
 
-            ComponentResponse response = webClientProvider.getWebClient()
+            return webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
@@ -94,12 +127,9 @@ public class NexusAccessService {
                     .retrieve()
                     .bodyToMono(ComponentResponse.class)
                     .block();
-
-            return response != null ? response.getItems() : Collections.emptyList();
         } catch (RuntimeException e) {
             log.error("Error during the call to get components: ", e);
-            handleInvocationError(e);
-            return Collections.emptyList();
+            return null;
         }
     }
 

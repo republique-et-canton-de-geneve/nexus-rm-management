@@ -7,4 +7,6 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Asset {
     private long fileSize;
+    private String lastModified;
+    private String path;
 }
