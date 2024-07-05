@@ -1,18 +1,17 @@
 package ch.ge.cti.nexus.nexusrmgui.business;
 
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,12 +21,40 @@ public class ComponentService {
     @Resource
     private NexusAccessService nexusAccessService;
 
+    @Value("${app.formservices.minimum-size-file}")
+    private int minSize;
+
     public void montrerComponents() {
-        List<Component> components = nexusAccessService.getComponents();
+        List<Component> components = fetchAllComponents();
         writeComponentsToExcel(components);
         for (Component component : components) {
             log.info(component.toString());
         }
+    }
+
+    private List<Component> fetchAllComponents() {
+        List<Component> allComponents = new ArrayList<>();
+        String continuationToken = null;
+
+        do {
+            ComponentResponse response = nexusAccessService.getComponents(continuationToken);
+            if (response != null && response.getItems() != null) {
+                allComponents.addAll(response.getItems().stream()
+                        .peek(component -> component.setAssets(
+                                component.getAssets().stream()
+                                        .filter(asset -> asset.getFileSize() >= minSize)
+                                        .sorted(Comparator.comparingLong(Asset::getFileSize).reversed())
+                                        .collect(Collectors.toList())
+                        ))
+                        .filter(component -> !component.getAssets().isEmpty())
+                        .toList());
+                continuationToken = response.getContinuationToken();
+            } else {
+                continuationToken = null;
+            }
+        } while (continuationToken != null);
+
+        return allComponents;
     }
 
     private void writeComponentsToExcel(List<Component> components) {
@@ -130,7 +157,7 @@ public class ComponentService {
             if (!outputDir.exists()) {
                 outputDir.mkdir();
             }
-            long timestamp = System.currentTimeMillis() / 1000L; // Get current time in Unix format (seconds)
+            long timestamp = System.currentTimeMillis() / 1000L;
             String fileName = baseFileName + "_" + timestamp + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);

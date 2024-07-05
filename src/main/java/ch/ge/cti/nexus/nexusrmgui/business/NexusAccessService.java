@@ -1,43 +1,19 @@
 package ch.ge.cti.nexus.nexusrmgui.business;
 
-
 import ch.ge.cti.nexus.nexusrmgui.WebClientProvider;
+
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-//import org.springframework.web.reactive.function.BodyInserters;
-//import org.springframework.web.reactive.function.client.ClientResponse;
-//import org.springframework.web.reactive.function.client.WebClientRequestException;
-//import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
 
-//import ch.ge.ael.integration.marshalling.formservices.File;
-//import ch.ge.ael.integration.marshalling.formservices.FileForWorkflowStatusUpdate;
-//import ch.ge.ael.integration.marshalling.formservices.UserContext;
-//import ch.ge.ael.integration.marshalling.formservices.WorkflowStatus;
-//import ch.ge.ael.integration.v1.business.exception.ClientException;
-//import ch.ge.ael.integration.v1.business.exception.FormServicesException;
-//import ch.ge.ael.integration.v1.business.exception.MediationException;
-//import ch.ge.ael.integration.v1.business.exception.NoSuchDemandeException;
-//import ch.ge.ael.integration.v1.business.exception.NoSuchPrestationException;
-//import ch.ge.ael.integration.v1.business.http.WebClientProvider;
-//import static ch.ge.ael.integration.marshalling.formservices.WorkflowStatus.SOUMIS;
-//import static ch.ge.ael.integration.marshalling.formservices.WorkflowStatus.TRANSMIS_BO;
-//import static ch.ge.ael.integration.v1.business.http.Header.GINA_FULLNAME;
-//import static ch.ge.ael.integration.v1.business.http.Header.REMOTE_USER;
-//import static ch.ge.ael.integration.v1.business.http.Header.GINA_ROLES;
-//import static ch.ge.ael.integration.v1.business.http.Header.GINAUSER;
-//import static ch.ge.ael.integration.v1.business.util.Utils.NB_DEMANDES_PAR_PAGE;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 /**
@@ -52,9 +28,6 @@ public class NexusAccessService {
 
     @Value("${app.security.token}")
     private String token;
-
-    @Value("${app.formservices.minimum-size-file}")
-    private int minSize;
 
     /**
      * Fournisseur d'un WebClient (client d'acces non bloquant) vers le serveur FormServices.
@@ -86,32 +59,9 @@ public class NexusAccessService {
 /******************************************************************************************************************************
 *           !!! Temporaire !!! Classe a supprimer (utiliser pour le moment afin d'essayer le switch dans Application.java).
 ******************************************************************************************************************************/
-public List<Component> getComponents() {
-    List<Component> allComponents = new ArrayList<>();
-    String continuationToken = null;
 
-    do {
-        ComponentResponse response = fetchComponents(continuationToken);
-        if (response != null && response.getItems() != null) {
-            allComponents.addAll(response.getItems().stream()
-                    .peek(component -> component.setAssets(
-                            component.getAssets().stream()
-                                    .filter(asset -> asset.getFileSize() >= minSize)
-                                    .sorted(Comparator.comparingLong(Asset::getFileSize).reversed()) //
-                                    .collect(Collectors.toList())
-                    ))
-                    .filter(component -> !component.getAssets().isEmpty())
-                    .toList());
-            continuationToken = response.getContinuationToken();
-        } else {
-            continuationToken = null;
-        }
-    } while (continuationToken != null);
 
-    return allComponents;
-}
-
-    private ComponentResponse fetchComponents(String continuationToken) {
+    public ComponentResponse getComponents(String continuationToken) {
         try {
             var uri = "/v1/components?repository=project_release";
             if (continuationToken != null && !continuationToken.isEmpty()) {
