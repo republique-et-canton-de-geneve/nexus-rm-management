@@ -1,5 +1,7 @@
 package ch.ge.cti.nexus.nexusrmgui.business;
 
+import ch.ge.cti.nexus.nexusrmgui.Application;
+import ch.ge.cti.nexus.nexusrmgui.exception.ApplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -9,8 +11,11 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
 @Slf4j
@@ -19,20 +24,27 @@ public class CertificateService {
     @Resource
     private NexusAccessService nexusAccessService;
 
-    public void montrerCertificatsEchus() {
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
+    public List<Certificate> getExpiredCertificates() {
         try {
             Certificate[] certificates = nexusAccessService.getCertificats();
 
             // Filter and sort certificates
-            List<Certificate> relevantCertificates = Arrays.stream(certificates)
+            return Arrays.stream(certificates)
                     .filter(cert -> cert.getExpiresOn() <= System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L) // Filter to get certificates that are expired or will expire in a week or less
                     .sorted((cert1, cert2) -> Long.compare(cert2.getExpiresOn(), cert1.getExpiresOn())) // Sort from most recent to oldest
                     .toList();
 
-            writeCertificatesToExcel(relevantCertificates);
-        } catch (Exception e) {
-            log.error("Error processing certificates", e);
+        } catch (RuntimeException e) {
+            log.error("Error retrieving certificates", e);
+            throw new ApplicationException(e);
         }
+    }
+
+    public void showExpiredCertificates() {
+        List<Certificate> expiredCertificates = getExpiredCertificates();
+        writeCertificatesToExcel(expiredCertificates);
     }
 
     private void writeCertificatesToExcel(List<Certificate> certificates) {
@@ -46,20 +58,34 @@ public class CertificateService {
         CellStyle redStyle = createCellStyle(workbook, IndexedColors.RED);
         CellStyle orangeStyle = createCellStyle(workbook, IndexedColors.ORANGE);
         CellStyle yellowStyle = createCellStyle(workbook, IndexedColors.YELLOW);
-        CellStyle textStyle = createTextCellStyle(workbook);
+        CellStyle titleStyle = createTitleCellStyle(workbook);
+        CellStyle lightGreyStyle = createCellStyle(workbook, IndexedColors.GREY_25_PERCENT);
+        CellStyle whiteStyle = createCellStyle(workbook, IndexedColors.WHITE);
 
-        int rowNum = 0;
+        // Write the header row
+        writeHeaderRow(sheet, titleStyle);
+
+        int rowNum = 1; // row 0 is the header
         for (Certificate cert : certificates) {
-            rowNum = writeCertificate(sheet, cert, rowNum, redStyle, orangeStyle, yellowStyle, textStyle);
-            rowNum++; // Add an empty line between certificates
+            CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
+            rowNum = writeCertificateRow(sheet, cert, rowNum, redStyle, orangeStyle, yellowStyle, rowStyle);
         }
 
-        saveWorkbook(workbook, "output", "certificats_échus");
+        saveWorkbook(workbook);
     }
 
     private void setColumnWidths(Sheet sheet) {
-        sheet.setColumnWidth(0, 25 * 256); // Column A
-        sheet.setColumnWidth(1, 55 * 256); // Column B
+        sheet.setColumnWidth(0, 25 * 256);
+        sheet.setColumnWidth(1, 25 * 256);
+        sheet.setColumnWidth(2, 55 * 256);
+        sheet.setColumnWidth(3, 55 * 256);
+        sheet.setColumnWidth(4, 55 * 256);
+        sheet.setColumnWidth(5, 25 * 256);
+        sheet.setColumnWidth(6, 25 * 256);
+        sheet.setColumnWidth(7, 25 * 256);
+        sheet.setColumnWidth(8, 25 * 256);
+        sheet.setColumnWidth(9, 25 * 256);
+        sheet.setColumnWidth(10, 25 * 256);
     }
 
     private CellStyle createCellStyle(Workbook workbook, IndexedColors color) {
@@ -69,62 +95,70 @@ public class CertificateService {
         return style;
     }
 
-    private CellStyle createTextCellStyle(Workbook workbook) {
-        CellStyle style = workbook.createCellStyle();
-        DataFormat format = workbook.createDataFormat();
-        style.setDataFormat(format.getFormat("@"));
+    private CellStyle createTitleCellStyle(Workbook workbook) {
+        CellStyle style = createCellStyle(workbook, IndexedColors.GREY_50_PERCENT);
+        Font font = workbook.createFont();
+        font.setBold(true);
+        font.setColor(IndexedColors.WHITE.getIndex());
+        style.setFont(font);
         return style;
     }
 
-    private int writeCertificate(Sheet sheet, Certificate cert, int startRow, CellStyle redStyle, CellStyle orangeStyle, CellStyle yellowStyle, CellStyle textStyle) {
-        int rowNum = startRow;
+    private void writeHeaderRow(Sheet sheet, CellStyle titleStyle) {
+        Row headerRow = sheet.createRow(0);
+        String[] titles = {
+                "expiresOn", "issuedOn", "fingerprint", "id",
+                "issuerCommonName", "issuerOrganization", "issuerOrganizationalUnit",
+                "pem", "serialNumber", "subjectCommonName", "subjectOrganization"
+        };
+
+
+        IntStream.range(0, titles.length).forEach(i -> {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(titles[i]);
+            cell.setCellStyle(titleStyle);
+        });
+    }
+
+    private int writeCertificateRow(Sheet sheet, Certificate cert, int rowNum, CellStyle redStyle, CellStyle orangeStyle, CellStyle yellowStyle, CellStyle rowStyle) {
+        Row row = sheet.createRow(rowNum);
         CellStyle expiresOnStyle = getExpiresOnStyle(cert.getExpiresOn(), redStyle, orangeStyle, yellowStyle);
 
-        rowNum = createRow(sheet, rowNum, "expiresOn", String.valueOf(cert.getExpiresOn()), expiresOnStyle, textStyle);
-        rowNum = createRow(sheet, rowNum, "fingerprint", cert.getFingerprint());
-        rowNum = createRow(sheet, rowNum, "id", cert.getId());
-        rowNum = createRow(sheet, rowNum, "issuedOn", String.valueOf(cert.getIssuedOn()), textStyle);
-        rowNum = createRow(sheet, rowNum, "issuerCommonName", cert.getIssuerCommonName());
-        rowNum = createRow(sheet, rowNum, "issuerOrganization", cert.getIssuerOrganization());
-        rowNum = createRow(sheet, rowNum, "issuerOrganizationalUnit", cert.getIssuerOrganizationalUnit());
-        rowNum = createRow(sheet, rowNum, "pem", cert.getPem());
-        rowNum = createRow(sheet, rowNum, "serialNumber", cert.getSerialNumber());
-        rowNum = createRow(sheet, rowNum, "subjectCommonName", cert.getSubjectCommonName());
-        rowNum = createRow(sheet, rowNum, "subjectOrganization", cert.getSubjectOrganization());
-        rowNum = createRow(sheet, rowNum, "subjectOrganizationalUnit", cert.getSubjectOrganizationalUnit());
+        createCell(row, 0, formatDate(cert.getExpiresOn()), expiresOnStyle);
+        createCell(row, 1, formatDate(cert.getIssuedOn()), rowStyle);
+        createCell(row, 2, cert.getId(), rowStyle);
+        createCell(row, 3, cert.getFingerprint(), rowStyle);
+        createCell(row, 4, cert.getIssuerCommonName(), rowStyle);
+        createCell(row, 5, cert.getIssuerOrganization(), rowStyle);
+        createCell(row, 6, cert.getIssuerOrganizationalUnit(), rowStyle);
+        createCell(row, 7, cert.getPem(), rowStyle);
+        createCell(row, 8, cert.getSerialNumber(), rowStyle);
+        createCell(row, 9, cert.getSubjectCommonName(), rowStyle);
+        createCell(row, 10, cert.getSubjectOrganization(), rowStyle);
 
-        return rowNum;
+        return rowNum + 1;
     }
 
-    private int createRow(Sheet sheet, int rowNum, String name, String value) {
-        return createRow(sheet, rowNum, name, value, null, null);
+    private void createCell(Row row, int column, String value, CellStyle style) {
+        Cell cell = row.createCell(column);
+        cell.setCellValue(value);
+        if (style != null) {
+            cell.setCellStyle(style);
+        }
     }
 
-    private int createRow(Sheet sheet, int rowNum, String name, String value, CellStyle nameStyle) {
-        return createRow(sheet, rowNum, name, value, nameStyle, null);
+    private String formatDate(long timestamp) {
+        return dateFormat.format(new Date(timestamp));
     }
 
-    private int createRow(Sheet sheet, int rowNum, String name, String value, CellStyle nameStyle, CellStyle valueStyle) {
-        Row row = sheet.createRow(rowNum++);
-        Cell cell1 = row.createCell(0);
-        cell1.setCellValue(name);
-        if (nameStyle != null) cell1.setCellStyle(nameStyle);
-
-        Cell cell2 = row.createCell(1);
-        cell2.setCellValue(value);
-        if (valueStyle != null) cell2.setCellStyle(valueStyle);
-
-        return rowNum;
-    }
-
-    private void saveWorkbook(Workbook workbook, String outputDirName, String baseFileName) {
+    private void saveWorkbook(Workbook workbook) {
         try {
-            File outputDir = new File(outputDirName);
+            File outputDir = new File("output");
             if (!outputDir.exists()) {
                 outputDir.mkdir();
             }
             long timestamp = System.currentTimeMillis() / 1000L; // Get current time in Unix format (seconds)
-            String fileName = baseFileName + "_" + timestamp + ".xlsx";
+            String fileName = "certificats_échus" + "_" + timestamp + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);
             fileOut.close();
@@ -138,8 +172,8 @@ public class CertificateService {
     private CellStyle getExpiresOnStyle(long expiresOn, CellStyle redStyle, CellStyle orangeStyle, CellStyle yellowStyle) {
         long currentTime = System.currentTimeMillis();
         long diff = expiresOn - currentTime;
-        long weekInMillis = 7 * 24 * 60 * 60 * 1000;
-        long fourDaysInMillis = 4 * 24 * 60 * 60 * 1000;
+        long weekInMillis = 604800000; // résultat de 7 * 24 * 60 * 60 * 1000
+        long fourDaysInMillis = 345600000; // résultat de 4 * 24 * 60 * 60 * 1000
 
         if (expiresOn <= currentTime) {
             return redStyle; // Already expired

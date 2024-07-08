@@ -1,18 +1,15 @@
 package ch.ge.cti.nexus.nexusrmgui.business;
 
 import ch.ge.cti.nexus.nexusrmgui.WebClientProvider;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -82,6 +79,26 @@ public class NexusAccessService {
             return null;
         }
     }
+    /******************************************************************************************************************************
+     *           !!! Temporaire !!! Classe a supprimer (utiliser pour le moment afin d'essayer le switch dans Application.java).
+     ******************************************************************************************************************************/
+    public List<Permission> getPermissions() {
+        try {
+            var uri = "/v1/security/users";
+            return Arrays.asList(Objects.requireNonNull(webClientProvider.getWebClient()
+                    .get()
+                    .uri(uri)
+                    .accept(APPLICATION_JSON)
+                    .header("Authorization", "Basic " + token)
+                    .retrieve()
+                    .bodyToMono(Permission[].class)
+                    .block()));
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+            return Collections.emptyList();
+        }
+    }
+
 
     /**
      * Erreur lors de l'appel a FormServices.
@@ -97,5 +114,6 @@ public class NexusAccessService {
     void setWebClientProvider(WebClientProvider webClientProvider) {
         this.webClientProvider = webClientProvider;
     }
+
 
 }

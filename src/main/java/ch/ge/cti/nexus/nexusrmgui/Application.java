@@ -3,6 +3,7 @@ package ch.ge.cti.nexus.nexusrmgui;
 import ch.ge.cti.nexus.nexusrmgui.business.CertificateService;
 import ch.ge.cti.nexus.nexusrmgui.business.ComponentService;
 
+import ch.ge.cti.nexus.nexusrmgui.business.PermissionService;
 import jakarta.annotation.Resource;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,11 +33,15 @@ public class Application implements CommandLineRunner {
             switch (option) {
                 case "certificate", "1":
                     var certificateService = applicationContext.getBean(CertificateService.class);
-                    certificateService.montrerCertificatsEchus();
+                    certificateService.showExpiredCertificates();
                     break;
                 case "component", "2":
                     var userService = applicationContext.getBean(ComponentService.class);
                     userService.montrerComponents();
+                    break;
+                case "permission", "3":
+                    var roleService = applicationContext.getBean(PermissionService.class);
+                    roleService.montrerPermissions();
                     break;
                 default:
                     System.out.println("Invalid option. Use 'user' or '2' for users, 'certificate' or '1' for certificates.");
