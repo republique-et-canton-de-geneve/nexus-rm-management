@@ -21,10 +21,10 @@ public class ComponentService {
     @Resource
     private NexusAccessService nexusAccessService;
 
-    @Value("${app.formservices.minimum-size-file}")
+    @Value("${app.nexusservices.minimum-size-file}")
     private int minSize;
 
-    public void montrerComponents() {
+    public void showComponents() {
         List<Component> components = fetchAllComponents();
         writeComponentsToExcel(components);
         for (Component component : components) {
@@ -44,7 +44,7 @@ public class ComponentService {
                             List<Asset> sortedAssets = component.getAssets().stream()
                                     .filter(asset -> asset.getFileSize() >= minSize)
                                     .sorted(Comparator.comparingLong(Asset::getFileSize).reversed())
-                                    .collect(Collectors.toList());
+                                    .toList();
                             component.setAssets(sortedAssets);
                             return component;
                         })

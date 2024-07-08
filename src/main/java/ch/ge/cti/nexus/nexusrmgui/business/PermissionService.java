@@ -12,7 +12,7 @@ public class PermissionService {
     @Resource
     private NexusAccessService nexusAccessService;
 
-    public void montrerPermissions() {
+    public void showPermissions() {
         List<Permission> permissions = nexusAccessService.getPermissions();
         for (Permission permission : permissions) {
             log.info(permission.toString());

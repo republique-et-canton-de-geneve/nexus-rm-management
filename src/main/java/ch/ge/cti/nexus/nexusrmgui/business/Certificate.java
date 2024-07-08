@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * Gestion du format JSON des certificats TLS des depots.
- */
+
 @Data
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)

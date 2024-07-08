@@ -28,8 +28,8 @@ import java.security.cert.CertificateException;
 import java.time.Duration;
 
 /**
- * Un object en charge de creer un {@link WebClient}.
- * Permet, dans le cas des tests JUnit, d'injecter l'URL (formServiceUrl) d'un mock server.
+ * An object responsible for creating a {@link WebClient}.
+ * Allows, in the case of JUnit tests, to inject the URL (nexusServiceUrl) of a mock server.
  */
 @Component
 @Slf4j
@@ -40,31 +40,31 @@ public class WebClientProvider {
 
     public WebClientProvider(
 
-            @Value("${app.formservices.url}")
-            String formServicesUrl,
+            @Value("${app.nexusservices.url}")
+            String nexusServicesUrl,
 
-            @Value("${app.formservices.response-timeout-milliseconds}")
+            @Value("${app.nexusservices.response-timeout-milliseconds}")
             int responseTimeout,
 
-            @Value("${app.formservices.connection-timeout-milliseconds}")
+            @Value("${app.nexusservices.connection-timeout-milliseconds}")
             int connectionTimeout,
 
             @Value("${javax.net.ssl.trustStore}")
-            String trustStorePath,       // inutile si sslEnabled = false
+            String trustStorePath,       // useless if sslEnabled = false
 
             @Value("${javax.net.ssl.trustStorePassword}")
-            String trustStorePassword,   // inutile si sslEnabled = false
+            String trustStorePassword,   // useless if sslEnabled = false
 
-            @Value("${app.formservices.ssl.enabled}")
+            @Value("${app.nexusservices.ssl.enabled}")
             boolean sslEnabled
     )
             throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException
     {
-        log.info("URL FormServices = {}", formServicesUrl);
+        log.info("URL NexusServices = {}", nexusServicesUrl);
 
         HttpClient httpClient;
         if (sslEnabled) {
-            // cas general, cad hors tests JUnit
+            // in general, i.e., outside of JUnit tests
             var trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             try (FileInputStream inputStream = new FileInputStream(ResourceUtils.getFile(trustStorePath))){
                 trustStore.load(inputStream, trustStorePassword.toCharArray());
@@ -80,16 +80,16 @@ public class WebClientProvider {
                     .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout)
                     .secure(t -> t.sslContext(sslContext));
         } else {
-            // cas d'un test JUnit
-            // en court-circuitant SSL, on evite une erreur "IllegalArgumentException: Resource location must not be null"
+            // in a JUnit test
+            // by bypassing SSL, we avoid an "IllegalArgumentException: Resource location must not be null" error
             httpClient = HttpClient.create();
         }
 
         webClient = WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .baseUrl(formServicesUrl)
+                .baseUrl(nexusServicesUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10000000))  // FRMSRV-212
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10000000))
                 .build();
     }
 

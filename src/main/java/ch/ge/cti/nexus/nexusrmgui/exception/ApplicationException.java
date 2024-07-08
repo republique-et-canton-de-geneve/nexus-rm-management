@@ -1,7 +1,7 @@
 package ch.ge.cti.nexus.nexusrmgui.exception;
 
 /**
- * Une exception levee durant l'execution du batch.
+ * An exception thrown during the execution of the batch.
  */
 public class ApplicationException extends RuntimeException {
 

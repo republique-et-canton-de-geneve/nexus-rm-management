@@ -37,11 +37,11 @@ public class Application implements CommandLineRunner {
                     break;
                 case "component", "2":
                     var userService = applicationContext.getBean(ComponentService.class);
-                    userService.montrerComponents();
+                    userService.showComponents();
                     break;
                 case "permission", "3":
                     var roleService = applicationContext.getBean(PermissionService.class);
-                    roleService.montrerPermissions();
+                    roleService.showPermissions();
                     break;
                 default:
                     System.out.println("Invalid option. Use 'user' or '2' for users, 'certificate' or '1' for certificates.");

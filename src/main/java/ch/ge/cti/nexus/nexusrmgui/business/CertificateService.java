@@ -158,7 +158,7 @@ public class CertificateService {
                 outputDir.mkdir();
             }
             long timestamp = System.currentTimeMillis() / 1000L; // Get current time in Unix format (seconds)
-            String fileName = "certificats_échus" + "_" + timestamp + ".xlsx";
+            String fileName = "expired_certificates" + "_" + timestamp + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);
             fileOut.close();
