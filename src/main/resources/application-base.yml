@@ -14,7 +14,7 @@ app:
 
     response-timeout-milliseconds: 30000
 
-    minimum-size-file: 5000
+    minimum-size-file: 40000
 
     ssl:
       enabled: true
