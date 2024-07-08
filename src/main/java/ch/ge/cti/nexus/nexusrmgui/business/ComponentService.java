@@ -39,20 +39,26 @@ public class ComponentService {
         do {
             ComponentResponse response = nexusAccessService.getComponents(continuationToken);
             if (response != null && response.getItems() != null) {
-                allComponents.addAll(response.getItems().stream()
-                        .peek(component -> component.setAssets(
-                                component.getAssets().stream()
-                                        .filter(asset -> asset.getFileSize() >= minSize)
-                                        .sorted(Comparator.comparingLong(Asset::getFileSize).reversed())
-                                        .collect(Collectors.toList())
-                        ))
+                List<Component> components = response.getItems().stream()
+                        .map(component -> {
+                            List<Asset> sortedAssets = component.getAssets().stream()
+                                    .filter(asset -> asset.getFileSize() >= minSize)
+                                    .sorted(Comparator.comparingLong(Asset::getFileSize).reversed())
+                                    .collect(Collectors.toList());
+                            component.setAssets(sortedAssets);
+                            return component;
+                        })
                         .filter(component -> !component.getAssets().isEmpty())
-                        .toList());
+                        .toList();
+
+                allComponents.addAll(components);
                 continuationToken = response.getContinuationToken();
             } else {
                 continuationToken = null;
             }
         } while (continuationToken != null);
+
+        allComponents.sort(Comparator.comparing(Component::getMaxAssetSize).reversed());
 
         return allComponents;
     }
@@ -74,13 +80,13 @@ public class ComponentService {
         setRowHeight(headerRow);
 
         // Create headers
-        createCell(headerRow, 0, "ID", boldStyle);
-        createCell(headerRow, 1, "GROUP", boldStyle);
-        createCell(headerRow, 2, "NAME", boldStyle);
-        createCell(headerRow, 3, "VERSION", boldStyle);
-        createCell(headerRow, 4, "FILESIZE", boldStyle);
-        createCell(headerRow, 5, "LASTMODIFIED", boldStyle);
-        createCell(headerRow, 6, "PATH", boldStyle);
+        createCell(headerRow, 0, "GROUP", boldStyle);
+        createCell(headerRow, 1, "NAME", boldStyle);
+        createCell(headerRow, 2, "VERSION", boldStyle);
+        createCell(headerRow, 3, "FILESIZE", boldStyle);
+        createCell(headerRow, 4, "LASTMODIFIED", boldStyle);
+        createCell(headerRow, 5, "PATH", boldStyle);
+        createCell(headerRow, 6, "ID", boldStyle);
 
         for (Component component : components) {
             boolean firstRow = true;
@@ -89,37 +95,35 @@ public class ComponentService {
                 Row row = sheet.createRow(rowNum++);
                 setRowHeight(row);
 
-                createCell(row, 0, component.getId(), firstRow ? boldStyle : normalStyle);
-                createCell(row, 1, component.getGroup(), firstRow ? boldStyle : normalStyle);
-                createCell(row, 2, component.getName(), firstRow ? boldStyle : normalStyle);
-                createCell(row, 3, component.getVersion(), firstRow ? boldStyle : normalStyle);
+                createCell(row, 0, component.getGroup(), firstRow ? boldStyle : normalStyle);
+                createCell(row, 1, component.getName(), firstRow ? boldStyle : normalStyle);
+                createCell(row, 2, component.getVersion(), firstRow ? boldStyle : normalStyle);
 
-                createCell(row, 4, String.valueOf(asset.getFileSize()), fileSizeStyle);
-                createCell(row, 5, asset.getLastModified(), normalStyle);
-                createCell(row, 6, asset.getPath(), normalStyle);
+                createCell(row, 3, String.valueOf(asset.getFileSize()), fileSizeStyle);
+                createCell(row, 4, asset.getLastModified(), normalStyle);
+                createCell(row, 5, asset.getPath(), normalStyle);
+                createCell(row, 6, component.getId(), firstRow ? boldStyle : normalStyle);
 
                 firstRow = false;
             }
 
-            // Add an empty line between components
-            // sheet.createRow(rowNum++);
         }
 
         saveWorkbook(workbook, "output", "components");
     }
 
     private void setColumnWidths(Sheet sheet) {
-        sheet.setColumnWidth(0, 78 * 256); // ID column
-        sheet.setColumnWidth(1, 28 * 256); // GROUP column
-        sheet.setColumnWidth(2, 28 * 256); // NAME column
-        sheet.setColumnWidth(3, 28 * 256); // VERSION column
-        sheet.setColumnWidth(4, 28 * 256); // FILESIZE column
-        sheet.setColumnWidth(5, 35 * 256); // LASTMODIFIED column
-        sheet.setColumnWidth(6, 85 * 256); // PATH column
+        sheet.setColumnWidth(0, 28 * 256); // GROUP column
+        sheet.setColumnWidth(1, 28 * 256); // NAME column
+        sheet.setColumnWidth(2, 28 * 256); // VERSION column
+        sheet.setColumnWidth(3, 28 * 256); // FILESIZE column
+        sheet.setColumnWidth(4, 28 * 256); // LASTMODIFIED column
+        sheet.setColumnWidth(5, 85 * 256); // PATH column
+        sheet.setColumnWidth(6, 85 * 256); // ID column
     }
 
     private void setRowHeight(Row row) {
-        row.setHeightInPoints(23); // Set the height to 23 points
+        row.setHeightInPoints(23);
     }
 
     private CellStyle createBoldStyle(Workbook workbook) {
