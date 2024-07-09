@@ -132,9 +132,9 @@ class CertificateServiceTest {
 
         // Then
         then(expiredCertificates).isNotNull();
-        then(expiredCertificates).hasSize(2);
-        then(expiredCertificates.get(0).getId()).isEqualTo("cert2");
-        then(expiredCertificates.get(1).getId()).isEqualTo("cert1");
+        then(expiredCertificates).hasSize(3);
+        then(expiredCertificates.get(0).getId()).isEqualTo("cert3");
+        then(expiredCertificates.get(1).getId()).isEqualTo("cert2");
     }
 
 
