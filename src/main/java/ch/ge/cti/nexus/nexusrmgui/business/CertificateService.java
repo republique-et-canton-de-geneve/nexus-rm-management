@@ -26,13 +26,13 @@ public class CertificateService {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
-    public List<Certificate> getExpiredCertificates() {
+    public List<Certificate> getExpiredCertificates(int days) {
         try {
             Certificate[] certificates = nexusAccessService.getCertificats();
 
             // Filter and sort certificates
             return Arrays.stream(certificates)
-                    .filter(cert -> cert.getExpiresOn() <= System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L) // Filter to get certificates that are expired or will expire in a week or less
+                    .filter(cert -> cert.getExpiresOn() <= System.currentTimeMillis() + days * 24 * 60 * 60 * 1000L) // Filter to get certificates that are expired or will expire in a week or less
                     .sorted((cert1, cert2) -> Long.compare(cert2.getExpiresOn(), cert1.getExpiresOn())) // Sort from most recent to oldest
                     .toList();
 
@@ -42,8 +42,8 @@ public class CertificateService {
         }
     }
 
-    public void showExpiredCertificates() {
-        List<Certificate> expiredCertificates = getExpiredCertificates();
+    public void showExpiredCertificates(int days) {
+        List<Certificate> expiredCertificates = getExpiredCertificates(days);
         writeCertificatesToExcel(expiredCertificates);
     }
 
@@ -77,15 +77,15 @@ public class CertificateService {
     private void setColumnWidths(Sheet sheet) {
         sheet.setColumnWidth(0, 25 * 256);
         sheet.setColumnWidth(1, 25 * 256);
-        sheet.setColumnWidth(2, 55 * 256);
-        sheet.setColumnWidth(3, 55 * 256);
+        sheet.setColumnWidth(2, 25 * 256);
+        sheet.setColumnWidth(3, 25 * 256);
         sheet.setColumnWidth(4, 55 * 256);
-        sheet.setColumnWidth(5, 25 * 256);
-        sheet.setColumnWidth(6, 25 * 256);
+        sheet.setColumnWidth(5, 55 * 256);
+        sheet.setColumnWidth(6, 55 * 256);
         sheet.setColumnWidth(7, 25 * 256);
         sheet.setColumnWidth(8, 25 * 256);
-        sheet.setColumnWidth(9, 25 * 256);
-        sheet.setColumnWidth(10, 25 * 256);
+        sheet.setColumnWidth(9, 55 * 256);
+        sheet.setColumnWidth(10, 55 * 256);
     }
 
     private CellStyle createCellStyle(Workbook workbook, IndexedColors color) {
@@ -107,9 +107,9 @@ public class CertificateService {
     private void writeHeaderRow(Sheet sheet, CellStyle titleStyle) {
         Row headerRow = sheet.createRow(0);
         String[] titles = {
-                "expiresOn", "issuedOn", "fingerprint", "id",
+                "expiresOn", "issuedOn", "subjectCommonName", "subjectOrganization", "fingerprint", "id",
                 "issuerCommonName", "issuerOrganization", "issuerOrganizationalUnit",
-                "pem", "serialNumber", "subjectCommonName", "subjectOrganization"
+                "pem", "serialNumber"
         };
 
 
@@ -126,15 +126,16 @@ public class CertificateService {
 
         createCell(row, 0, formatDate(cert.getExpiresOn()), expiresOnStyle);
         createCell(row, 1, formatDate(cert.getIssuedOn()), rowStyle);
-        createCell(row, 2, cert.getId(), rowStyle);
-        createCell(row, 3, cert.getFingerprint(), rowStyle);
-        createCell(row, 4, cert.getIssuerCommonName(), rowStyle);
-        createCell(row, 5, cert.getIssuerOrganization(), rowStyle);
-        createCell(row, 6, cert.getIssuerOrganizationalUnit(), rowStyle);
-        createCell(row, 7, cert.getPem(), rowStyle);
-        createCell(row, 8, cert.getSerialNumber(), rowStyle);
-        createCell(row, 9, cert.getSubjectCommonName(), rowStyle);
-        createCell(row, 10, cert.getSubjectOrganization(), rowStyle);
+        createCell(row, 2, cert.getSubjectCommonName(), rowStyle);
+        createCell(row, 3, cert.getSubjectOrganization(), rowStyle);
+        createCell(row, 4, cert.getId(), rowStyle);
+        createCell(row, 5, cert.getFingerprint(), rowStyle);
+        createCell(row, 6, cert.getIssuerCommonName(), rowStyle);
+        createCell(row, 7, cert.getIssuerOrganization(), rowStyle);
+        createCell(row, 8, cert.getIssuerOrganizationalUnit(), rowStyle);
+        createCell(row, 9, cert.getPem(), rowStyle);
+        createCell(row, 10, cert.getSerialNumber(), rowStyle);
+
 
         return rowNum + 1;
     }

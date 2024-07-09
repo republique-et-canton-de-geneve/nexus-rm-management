@@ -70,7 +70,7 @@ class CertificateServiceTest {
         given(nexusAccessService.getCertificats()).willReturn(expiredCertificates.toArray(new Certificate[0]));
 
         // When
-        certificateService.showExpiredCertificates();
+        certificateService.showExpiredCertificates(30);
 
         // Then
         then(expiredCertificates).isNotNull();
@@ -128,7 +128,7 @@ class CertificateServiceTest {
         given(nexusAccessService.getCertificats()).willReturn(mockCertificates);
 
         // When
-        List<Certificate> expiredCertificates = certificateService.getExpiredCertificates();
+        List<Certificate> expiredCertificates = certificateService.getExpiredCertificates(30);
 
         // Then
         then(expiredCertificates).isNotNull();

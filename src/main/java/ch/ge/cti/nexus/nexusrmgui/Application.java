@@ -17,6 +17,8 @@ import org.springframework.context.ApplicationContext;
 @Slf4j
 public class Application implements CommandLineRunner {
 
+    int days;
+
     @Resource
     ApplicationContext applicationContext;
 
@@ -33,7 +35,12 @@ public class Application implements CommandLineRunner {
             switch (option) {
                 case "certificate", "1":
                     var certificateService = applicationContext.getBean(CertificateService.class);
-                    certificateService.showExpiredCertificates();
+                    if (args.length > 1) {
+                        days = Integer.parseInt(args[1]);
+                    } else {
+                        days = 30;
+                    }
+                    certificateService.showExpiredCertificates(days);
                     break;
                 case "component", "2":
                     var userService = applicationContext.getBean(ComponentService.class);
