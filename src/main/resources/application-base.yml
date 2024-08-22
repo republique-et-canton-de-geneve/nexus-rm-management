@@ -1,30 +1,23 @@
-# Fichier de configuration pour l'application. Sert :
-# - en mode "mvn spring-boot:run"
-# - en mode Tomcat, avec ecrasement de certaines valeurs par GoCD
-# necessaire, sinon erreur "PKIX path building failed" a la connexion HTTPS a FormServices
+# Copy this file into file "application.yml", see the README file.
 app:
   security:
-    token: TOKEN_BASE64
+    # A FAIRE : déplacer dans nexusservice
+    token: TO_BE_PROVIDED (IN BASE 64)
 
+  # A FAIRE : renommer "nexusservices" en "nexus"
   nexusservices:
-
-    url: ***REMOVED***/service/rest
-
+    url: TO_BE_PROVIDED
     connection-timeout-milliseconds: 5000
-
     response-timeout-milliseconds: 30000
-
     minimum-size-file: 40000
-
     ssl:
       enabled: true
-
 
 javax:
   net:
     ssl:
-      trustStore: classpath:security/***REMOVED***.jks
-      trustStorePassword: ***REMOVED***
+      trustStore: classpath:security/truststore.jks
+      trustStorePassword: TO_BE_PROVIDED
 
 logging:
   level:
