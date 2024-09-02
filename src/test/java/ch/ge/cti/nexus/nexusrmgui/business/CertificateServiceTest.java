@@ -1,5 +1,7 @@
 package ch.ge.cti.nexus.nexusrmgui.business;
 
+import ch.ge.cti.nexus.nexusrmgui.business.certificate.Certificate;
+import ch.ge.cti.nexus.nexusrmgui.service.CertificateService;
 import ch.ge.cti.nexus.nexusrmgui.utils.TestExecutionLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;

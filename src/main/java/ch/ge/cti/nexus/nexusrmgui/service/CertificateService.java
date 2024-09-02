@@ -1,6 +1,7 @@
-package ch.ge.cti.nexus.nexusrmgui.business;
+package ch.ge.cti.nexus.nexusrmgui.service;
 
-import ch.ge.cti.nexus.nexusrmgui.Application;
+import ch.ge.cti.nexus.nexusrmgui.business.certificate.Certificate;
+import ch.ge.cti.nexus.nexusrmgui.business.NexusAccessService;
 import ch.ge.cti.nexus.nexusrmgui.exception.ApplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -51,9 +52,6 @@ public class CertificateService {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Certificates");
 
-        // Set column widths
-        setColumnWidths(sheet);
-
         // Create styles
         CellStyle redStyle = createCellStyle(workbook, IndexedColors.RED);
         CellStyle orangeStyle = createCellStyle(workbook, IndexedColors.ORANGE);
@@ -71,21 +69,10 @@ public class CertificateService {
             rowNum = writeCertificateRow(sheet, cert, rowNum, redStyle, orangeStyle, yellowStyle, rowStyle);
         }
 
-        saveWorkbook(workbook);
-    }
+        // Auto-size columns
+        autoSizeColumns(sheet);
 
-    private void setColumnWidths(Sheet sheet) {
-        sheet.setColumnWidth(0, 25 * 256);
-        sheet.setColumnWidth(1, 25 * 256);
-        sheet.setColumnWidth(2, 25 * 256);
-        sheet.setColumnWidth(3, 25 * 256);
-        sheet.setColumnWidth(4, 55 * 256);
-        sheet.setColumnWidth(5, 55 * 256);
-        sheet.setColumnWidth(6, 55 * 256);
-        sheet.setColumnWidth(7, 25 * 256);
-        sheet.setColumnWidth(8, 25 * 256);
-        sheet.setColumnWidth(9, 55 * 256);
-        sheet.setColumnWidth(10, 55 * 256);
+        saveWorkbook(workbook);
     }
 
     private CellStyle createCellStyle(Workbook workbook, IndexedColors color) {
@@ -112,7 +99,6 @@ public class CertificateService {
                 "pem", "serialNumber"
         };
 
-
         IntStream.range(0, titles.length).forEach(i -> {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(titles[i]);
@@ -136,7 +122,6 @@ public class CertificateService {
         createCell(row, 9, cert.getPem(), rowStyle);
         createCell(row, 10, cert.getSerialNumber(), rowStyle);
 
-
         return rowNum + 1;
     }
 
@@ -152,6 +137,12 @@ public class CertificateService {
         return dateFormat.format(new Date(timestamp));
     }
 
+    private void autoSizeColumns(Sheet sheet) {
+        for (int i = 0; i < 11; i++) { // Assuming there are 11 columns
+            sheet.autoSizeColumn(i);
+        }
+    }
+
     private void saveWorkbook(Workbook workbook) {
         try {
             File outputDir = new File("output");
@@ -159,7 +150,7 @@ public class CertificateService {
                 outputDir.mkdir();
             }
             long timestamp = System.currentTimeMillis() / 1000L; // Get current time in Unix format (seconds)
-            String fileName = "expired_certificates" + "_" + timestamp + ".xlsx";
+            String fileName = "expired_certificates_" + timestamp + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);
             fileOut.close();

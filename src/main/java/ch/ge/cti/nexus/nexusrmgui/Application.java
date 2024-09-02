@@ -1,9 +1,9 @@
 package ch.ge.cti.nexus.nexusrmgui;
 
-import ch.ge.cti.nexus.nexusrmgui.business.CertificateService;
-import ch.ge.cti.nexus.nexusrmgui.business.ComponentService;
+import ch.ge.cti.nexus.nexusrmgui.service.CertificateService;
+import ch.ge.cti.nexus.nexusrmgui.service.ComponentService;
 
-import ch.ge.cti.nexus.nexusrmgui.business.PermissionService;
+import ch.ge.cti.nexus.nexusrmgui.service.PermissionService;
 import jakarta.annotation.Resource;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ public class Application implements CommandLineRunner {
             String option = args[0];
 
             switch (option) {
-                case "certificate", "1":
+                case "certificates", "1":
                     var certificateService = applicationContext.getBean(CertificateService.class);
                     if (args.length > 1) {
                         days = Integer.parseInt(args[1]);
@@ -42,19 +42,33 @@ public class Application implements CommandLineRunner {
                     }
                     certificateService.showExpiredCertificates(days);
                     break;
-                case "component", "2":
-                    var userService = applicationContext.getBean(ComponentService.class);
-                    userService.showComponents();
+                case "heavyComponents", "2":
+                    var componentService = applicationContext.getBean(ComponentService.class);
+                    componentService.showComponents();
                     break;
-                case "permission", "3":
+                case "permissions", "3":
                     var roleService = applicationContext.getBean(PermissionService.class);
-                    roleService.showPermissions();
+                    if (args.length > 1) {
+                        var userId = args[1].toUpperCase();
+                        roleService.showPermissions(userId);
+                    } else {
+                        System.out.println("Please provide a user ID for the 'permission' option.");
+                    }
+                    break;
+                case "deleteComponents", "4":
+                    var componentServiceForDelete = applicationContext.getBean(ComponentService.class);
+                    var dryRun = true;
+                    // By default, dryRun is true. It is set to false only if the second argument is "realRun".
+                    if (args.length > 1 && args[1].equalsIgnoreCase("realRun")) {
+                        dryRun = false;
+                    }
+                    componentServiceForDelete.deleteComponents(dryRun);
                     break;
                 default:
-                    System.out.println("Invalid option. Use 'user' or '2' for users, 'certificate' or '1' for certificates.");
+                    System.out.println("Invalid option. Use 'certificate' or '1' for certificates, 'heavyComponents' or '2' for heavyComponents, 'permissions' or '3' for permissions, 'deleteComponents' or '4' for deleteComponents.");
             }
         } else {
-            System.out.println("No arguments provided. Use 'user' or '2' for users, 'certificate' or '1' for certificates.");
+            System.out.println("No arguments provided. Use 'certificate' or '1' for certificates, 'heavyComponents' or '2' for heavyComponents, 'permissions' or '3' for permissions, 'deleteComponents' or '4' for deleteComponents.");
         }
     }
 }

@@ -1,10 +1,9 @@
-package ch.ge.cti.nexus.nexusrmgui.business;
+package ch.ge.cti.nexus.nexusrmgui.business.component;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.util.List;
-import java.util.OptionalLong;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

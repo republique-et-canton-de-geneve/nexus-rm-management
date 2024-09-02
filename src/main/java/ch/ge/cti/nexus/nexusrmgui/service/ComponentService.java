@@ -1,5 +1,9 @@
-package ch.ge.cti.nexus.nexusrmgui.business;
+package ch.ge.cti.nexus.nexusrmgui.service;
 
+import ch.ge.cti.nexus.nexusrmgui.business.component.Asset;
+import ch.ge.cti.nexus.nexusrmgui.business.component.Component;
+import ch.ge.cti.nexus.nexusrmgui.business.component.ComponentResponse;
+import ch.ge.cti.nexus.nexusrmgui.business.NexusAccessService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -24,12 +28,51 @@ public class ComponentService {
     @Value("${app.nexusservices.minimum-size-file}")
     private int minSize;
 
+    @Value("${app.business.latest-component}")
+    private int latestComponent;
+
     public void showComponents() {
         List<Component> components = fetchAllComponents();
-        writeComponentsToExcel(components);
+        writeComponentsToExcel(components,"heavyComponents");
         for (Component component : components) {
             log.info(component.toString());
         }
+    }
+
+    public void deleteComponents(boolean dryRun) {
+        List<Component> components = fetchAllComponents();
+
+        components.sort(Comparator.comparing(component ->
+                component.getAssets().stream()
+                        .map(Asset::getLastModified)
+                        .max(Comparator.naturalOrder())
+                        .orElse(null)));
+
+
+        List<Component> componentsToDelete = components.stream()
+                .skip(latestComponent)
+                .collect(Collectors.toList());
+
+        writeComponentsToExcel(componentsToDelete, "deletedComponents");
+
+        if (dryRun) {
+            simulateDeletion(componentsToDelete);
+        } else {
+            deleteComponents(componentsToDelete);
+        }
+    }
+
+    private void deleteComponents(List<Component> componentsToDelete) {
+        componentsToDelete
+                .forEach(component -> {
+                    log.info("Deleting component: " + component.toString());
+                    nexusAccessService.deleteComponent(component.getId());
+                });
+    }
+
+    private void simulateDeletion(List<Component> componentsToDelete) {
+        componentsToDelete
+                .forEach(component -> log.info("DRY RUN - Would delete: " + component.toString()));
     }
 
     private List<Component> fetchAllComponents() {
@@ -63,9 +106,9 @@ public class ComponentService {
         return allComponents;
     }
 
-    private void writeComponentsToExcel(List<Component> components) {
+    private void writeComponentsToExcel(List<Component> components, String baseFileName) {
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Components");
+        Sheet sheet = workbook.createSheet(baseFileName);
 
         // Set column widths
         setColumnWidths(sheet);
@@ -100,17 +143,16 @@ public class ComponentService {
                 createCell(row, 2, component.getVersion(), firstRow ? boldStyle : normalStyle);
 
                 createCell(row, 3, String.valueOf(asset.getFileSize()), fileSizeStyle);
-                createCell(row, 4, asset.getLastModified(), normalStyle);
+                createCell(row, 4, asset.getLastModified().toString(), normalStyle);
                 createCell(row, 5, asset.getPath(), normalStyle);
                 createCell(row, 6, component.getId(), firstRow ? boldStyle : normalStyle);
 
                 firstRow = false;
             }
-
         }
-
         saveWorkbook(workbook, "output", "components");
     }
+
 
     private void setColumnWidths(Sheet sheet) {
         sheet.setColumnWidth(0, 28 * 256); // GROUP column

@@ -1,6 +1,9 @@
 package ch.ge.cti.nexus.nexusrmgui.business;
 
 import ch.ge.cti.nexus.nexusrmgui.WebClientProvider;
+import ch.ge.cti.nexus.nexusrmgui.business.certificate.Certificate;
+import ch.ge.cti.nexus.nexusrmgui.business.component.ComponentResponse;
+import ch.ge.cti.nexus.nexusrmgui.business.permission.Permission;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -80,6 +83,23 @@ public class NexusAccessService {
             return null;
         }
     }
+
+    public void deleteComponent(String componentId) {
+        try {
+            var uri = "/v1/components/" + componentId;
+            webClientProvider.getWebClient()
+                    .delete()
+                    .uri(uri)
+                    .header("Authorization", "Basic " + token)
+                    .retrieve()
+                    .bodyToMono(Void.class)
+                    .block();
+            log.info("Deleted component with ID {}", componentId);
+        } catch (RuntimeException e) {
+            log.error("Error during the call to delete component: ", e);
+        }
+    }
+
     /**
      * Call to NexusServices
      * @return Permissions
