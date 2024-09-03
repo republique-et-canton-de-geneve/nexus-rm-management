@@ -1,14 +1,21 @@
-# 6799-nexus-rm-management : une console supplémentaire d'administration pour Nexus RM
+# 6799-nexus-rm-management : an additional admin console for Nexus RM
 
-La console d'administration de Nexus RM est notoirement insuffisante.
-Cette application-ci met œuvre des fonctionnalités que la console d'administration de
-Nexus RM n'inclut pas.
+The Nexus RM administration is insufficient.
+This application implements features that the Nexus RM
+administration console does not include.
 
 The application requires Java 21+.
 
-## 1) Fonctionnalités
+## 1) Features
 
-(À FAIRE)
+
+| Name                               |                                                                                                                                                             Description                                                                                                                                                              |                          Arguments | Example                                                         |
+|:-----------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|-----------------------------------:|-----------------------------------------------------------------|
+| Extraction of expired certificates |                                                     This program will check all certificates expiry date and return all the certificates that are already expired and those who will be in the next month. the return will be in a CSV file and sorted by most recent to oldest.                                                     |                   1 or certificate | certificate                                                     |
+| Extraction of heavy components     |                                                                                                   This program will check all components assets size, and write all the assets that have a size superior to 5 Mo into a CSV file.                                                                                                    |2 or heavyComponents | heavyComponents                                                 |
+| Extraction of user permissions                              |                                                                                                                                   This program will retrieve the permissions for a specified user.                                                                                                                                   |        3 or permissions and userID | permissions U135                                                |
+| Dry Run and Real Run for Component Deletion                              | This program will identify components for deletion. By default, it will run in dryRun mode, simulating the deletion and generating an Excel file with the components that would be deleted. To execute in dryRun mode, add the argument "4" or "deleteComponents". To perform actual deletion, add "realRun" as the second argument. |  4 or deleteComponents and realRun | dryRun:<br> deleteComponents <br> realRun:<br> 4 realRun |
+
 
 ## 2) Building the application
 

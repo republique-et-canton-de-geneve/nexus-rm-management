@@ -25,7 +25,7 @@ public class CertificateService {
     @Resource
     private NexusAccessService nexusAccessService;
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
     public List<Certificate> getExpiredCertificates(int days) {
         try {
