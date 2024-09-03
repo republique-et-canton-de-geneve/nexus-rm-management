@@ -18,8 +18,8 @@ app:
 javax:
   net:
     ssl:
-      trustStore: classpath:security/gina_20211015.jks
-      trustStorePassword: 2vH-mc4j
+      trustStore: classpath:security/truststore.jks
+      trustStorePassword: TO_BE_PROVIDED
 
 logging:
   level:
