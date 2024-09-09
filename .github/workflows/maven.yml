@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v2
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'adopt'
     - name: Build and Sonar
       run: mvn -B -U verify sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=etat-de-geneve-github -Dsonar.projectKey=republique-et-canton-de-geneve_nexus-rm-management
