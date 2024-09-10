@@ -1,4 +1,4 @@
-# 6799-nexus-rm-management : an additional admin console for Nexus RM
+# nexus-rm-management : an additional admin console for Nexus RM
 
 The Nexus RM administration is insufficient.
 This application implements features that the Nexus RM
