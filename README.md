@@ -1,3 +1,19 @@
+Build GitHub :
+
+[![Build with GitHub](https://github.com/republique-et-canton-de-geneve/nexus-rm-management/actions/workflows/maven.yml/badge.svg)](https://github.com/republique-et-canton-de-geneve/nexus-rm-management/blob/main/.github/workflows/maven.yml)
+
+Analyse SonarCloud :
+
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_nexus-rm-management&metric=bugs)](https://sonarcloud.io/summary/new_code?id=republique-et-canton-de-geneve_nexus-rm-management)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_nexus-rm-management&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=republique-et-canton-de-geneve_nexus-rm-management)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_nexus-rm-management&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=republique-et-canton-de-geneve_nexus-rm-management)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_nexus-rm-management&metric=coverage)](https://sonarcloud.io/summary/new_code?id=republique-et-canton-de-geneve_nexus-rm-management)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_nexus-rm-management&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=republique-et-canton-de-geneve_nexus-rm-management)
+
+Licence : 
+
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 # nexus-rm-management : an additional admin console for Nexus RM
 
 The Nexus RM administration is insufficient.
