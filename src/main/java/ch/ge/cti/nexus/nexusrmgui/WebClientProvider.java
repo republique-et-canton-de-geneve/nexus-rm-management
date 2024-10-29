@@ -55,13 +55,13 @@ public class WebClientProvider {
 
     public WebClientProvider(
 
-            @Value("${app.nexusservices.url}")
+            @Value("${app.nexus.url}")
             String nexusServicesUrl,
 
-            @Value("${app.nexusservices.response-timeout-milliseconds}")
+            @Value("${app.nexus.response-timeout-milliseconds}")
             int responseTimeout,
 
-            @Value("${app.nexusservices.connection-timeout-milliseconds}")
+            @Value("${app.nexus.connection-timeout-milliseconds}")
             int connectionTimeout,
 
             @Value("${javax.net.ssl.trustStore}")
@@ -70,7 +70,7 @@ public class WebClientProvider {
             @Value("${javax.net.ssl.trustStorePassword}")
             String trustStorePassword,   // useless if sslEnabled = false
 
-            @Value("${app.nexusservices.ssl.enabled}")
+            @Value("${app.nexus.ssl.enabled}")
             boolean sslEnabled
     )
             throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException

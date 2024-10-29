@@ -1,8 +1,8 @@
-Build GitHub :
+Build GitHub:
 
 [![Build with GitHub](https://github.com/republique-et-canton-de-geneve/nexus-rm-management/actions/workflows/maven.yml/badge.svg)](https://github.com/republique-et-canton-de-geneve/nexus-rm-management/blob/main/.github/workflows/maven.yml)
 
-Analyse SonarCloud :
+SonarCloud analysis:
 
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_nexus-rm-management&metric=bugs)](https://sonarcloud.io/summary/new_code?id=republique-et-canton-de-geneve_nexus-rm-management)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_nexus-rm-management&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=republique-et-canton-de-geneve_nexus-rm-management)
@@ -11,7 +11,7 @@ Analyse SonarCloud :
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_nexus-rm-management&metric=coverage)](https://sonarcloud.io/summary/new_code?id=republique-et-canton-de-geneve_nexus-rm-management)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=republique-et-canton-de-geneve_nexus-rm-management&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=republique-et-canton-de-geneve_nexus-rm-management)
 
-Licence : 
+Licence: 
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -60,10 +60,12 @@ store must be provided for the HTTPS interaction between the application and
 the Nexus RM server.
 
 Do the following:
-- Get a trust store file
+- Get a trust store file.
   At État de Genève it is usually a `gina.jks` file
-- Copy the file to directory `src/main/resources/security`
-- Edit file `application.yml` again and set the password to the file
+- Rename the file into `truststore.jks`
+- Copy file `truststore.jks` to directory `src/main/resources/security`
+- Edit file `application.yml` again and set the password of the trust store
+  file
 
 ### Running locally
 

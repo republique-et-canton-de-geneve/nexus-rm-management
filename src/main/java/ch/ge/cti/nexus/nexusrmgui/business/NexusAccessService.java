@@ -41,7 +41,7 @@ public class NexusAccessService {
     private static final String ERROR_MESSAGE_404 =
             "The Nexus server called by the application is unavailable or the URL is wrong";
 
-    @Value("${app.security.token}")
+    @Value("${app.security.token-base64}")
     private String token;
 
     /**

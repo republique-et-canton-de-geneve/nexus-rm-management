@@ -47,7 +47,7 @@ public class PermissionService {
     @Resource
     private WebClientProvider webClientProvider;
 
-    @Value("${app.security.token}")
+    @Value("${app.security.token-base64}")
     private String token;
 
     public void showPermissions(String userId) {

@@ -1,40 +1,22 @@
-#
-# Copyright (C) <Date> Republique et canton de Geneve
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#      https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-  
-# Configuration file for the application. Used:
-# - in "mvn spring-boot:run" mode
-# - in Tomcat mode, with some values overridden by GoCD
-# Necessary, otherwise "PKIX path building failed" error occurs when connecting to HTTPS FormServices
 app:
   business:
-    latest-component: 10
-  nexusservices:
+    component:
+      latest: 10
+      minimum-size-file: 40000
+  nexus:
     connection-timeout-milliseconds: 5000
-    minimum-size-file: 40000
     response-timeout-milliseconds: 30000
     ssl:
       enabled: true
-    url: URL_NEXUS_REST
+    url: MISSING
   security:
-    token: TOKEN_BASE64
+    token-base64: MISSING
 
 javax:
   net:
     ssl:
       trustStore: classpath:security/truststore.jks
-      trustStorePassword: TO_BE_PROVIDED
+      trustStorePassword: MISSING
 
 logging:
   level:

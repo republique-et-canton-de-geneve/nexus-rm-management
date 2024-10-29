@@ -164,13 +164,14 @@ public class CertificateService {
             if (!outputDir.exists()) {
                 outputDir.mkdir();
             }
-            long timestamp = System.currentTimeMillis() / 1000L; // Get current time in Unix format (seconds)
-            String fileName = "expired_certificates_" + timestamp + ".xlsx";
+            var fileName = "expired_certificates_"
+                    + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date())
+                    + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);
             fileOut.close();
             workbook.close();
-            log.info("Excel file has been generated successfully.");
+            log.info("File [{}] successfully generated in directory [{}]", fileName, outputDir);
         } catch (IOException e) {
             log.error("Error writing Excel file", e);
         }

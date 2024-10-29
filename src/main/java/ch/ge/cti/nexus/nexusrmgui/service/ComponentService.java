@@ -40,10 +40,10 @@ public class ComponentService {
     @Resource
     private NexusAccessService nexusAccessService;
 
-    @Value("${app.nexusservices.minimum-size-file}")
+    @Value("${app.business.component.minimum-size-file}")
     private int minSize;
 
-    @Value("${app.business.latest-component}")
+    @Value("${app.business.component.latest}")
     private int latestComponent;
 
     public void showComponents() {
