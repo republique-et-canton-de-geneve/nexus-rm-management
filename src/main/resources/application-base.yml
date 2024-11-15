@@ -12,6 +12,7 @@ app:
   security:
     token-base64: MISSING
 
+# not used if app.nexus.ssl.enabled = false
 javax:
   net:
     ssl:
@@ -27,3 +28,4 @@ logging:
 spring:
   main:
     banner-mode: log
+    web-application-type: none

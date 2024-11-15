@@ -19,27 +19,22 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.reactive.function.client.WebClient;
-
 import reactor.netty.http.client.HttpClient;
 
 import javax.net.ssl.TrustManagerFactory;
-
-import java.io.FileInputStream;
 import java.io.IOException;
-
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-
 import java.time.Duration;
 
 /**
@@ -81,7 +76,9 @@ public class WebClientProvider {
         if (sslEnabled) {
             // in general, i.e., outside of JUnit tests
             var trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            try (FileInputStream inputStream = new FileInputStream(ResourceUtils.getFile(trustStorePath))){
+//            try (FileInputStream inputStream = new FileInputStream(ResourceUtils.getFile(trustStorePath))){
+            try (InputStream inputStream = new ClassPathResource(trustStorePath).getInputStream()) {
+//            try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(trustStorePath)) {
                 trustStore.load(inputStream, trustStorePassword.toCharArray());
             }
             var trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
