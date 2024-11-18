@@ -15,7 +15,8 @@ Licence:
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-# nexus-rm-management : an additional admin console for Nexus RM
+nexus-rm-management : an additional admin console for Nexus RM
+==============================================================
 
 The Nexus RM administration is insufficient.
 This application implements features that the Nexus RM
@@ -23,7 +24,7 @@ administration console does not include.
 
 The application requires Java 21+.
 
-## 1) Features
+# 1) Features
 
 
 | Name                                        |                                                                                                                                                             Description                                                                                                                                                              |                         Arguments | Example                                                  |
@@ -34,15 +35,15 @@ The application requires Java 21+.
 | Dry Run and Real Run for Component Deletion | This program will identify components for deletion. By default, it will run in dryRun mode, simulating the deletion and generating an Excel file with the components that would be deleted. To execute in dryRun mode, add the argument "4" or "deleteComponents". To perform actual deletion, add "realRun" as the second argument. | 4 or deleteComponents and realRun | dryRun:<br> deleteComponents <br> realRun:<br> 4 realRun |
 
 
-## 2) Building the application
+# 2) Building the application
 
 ```
 mvn clean install
 ```
 
-## 3) Running the application locally
+# 3) Running the application locally
 
-### Configuring the application: property file
+## Pre-step : configuring the application: property file
 
 Do the following:
 - Go to directory `src/main/resources`
@@ -53,7 +54,7 @@ Do the following:
   their value is `TO_BE_PROVIDED`.
   For the particular case of `trustStorePassword`, don't do anything yet
 
-### Configuring the application: trust store
+## Pre-step : configuring the application: trust store
 
 At État de Genève we unfortunately use self-signed certificates, so a trust
 store must be provided for the HTTPS interaction between the application and
@@ -67,9 +68,9 @@ Do the following:
 - Edit file `application.yml` again and set the password of the trust store
   file
 
-### Running locally
+## Running locally
 
-There are two ways to do so.
+There are several ways to do so.
 
 ### Maven
 
@@ -105,7 +106,3 @@ If you use the IntelliJ, running the application from there is the most
 convenient way.
 
 Just run class `Application`.
-
-## 4) Running the application on a Linux server
-
-TODO
