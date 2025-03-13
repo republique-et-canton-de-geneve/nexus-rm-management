@@ -110,6 +110,7 @@ public class ComponentService {
                         .toList();
 
                 allComponents.addAll(components);
+                log.info("Found {} components so far", allComponents.size());
                 continuationToken = response.getContinuationToken();
             } else {
                 continuationToken = null;
@@ -117,6 +118,7 @@ public class ComponentService {
         } while (continuationToken != null);
 
         allComponents.sort(Comparator.comparing(Component::getMaxAssetSize).reversed());
+        log.info("Number of components in the repository : {}", allComponents.size());
 
         return allComponents;
     }

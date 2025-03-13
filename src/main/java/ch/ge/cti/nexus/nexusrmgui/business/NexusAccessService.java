@@ -29,10 +29,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 /**
- * REST requests to Nexus.
+ * REST requests to Nexus RM.
  */
 @Service
 @Slf4j
@@ -51,10 +52,8 @@ public class NexusAccessService {
     private WebClientProvider webClientProvider;
 
     /**
-     * Call to NexusServices
-     * @return Certificates
+     * Call to NexusServices.
      */
-
     public Certificate[] getCertificats() {
         try {
             var uri = "/v1/security/ssl/truststore";
@@ -73,18 +72,15 @@ public class NexusAccessService {
     }
 
     /**
-     * Call to NexusServices
-     * @return Components
+     * Call to NexusServices.
      */
-
     public ComponentResponse getComponents(String continuationToken) {
         try {
             var uri = "/v1/components?repository=project_release";
-            if (continuationToken != null && !continuationToken.isEmpty()) {
+            if (! isEmpty(continuationToken)) {
                 uri += "&continuationToken=" + continuationToken;
             }
             log.info("Request URL: " + uri);
-
             return webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
@@ -116,8 +112,7 @@ public class NexusAccessService {
     }
 
     /**
-     * Call to NexusServices
-     * @return Permissions
+     * Call to NexusServices.
      */
     public List<Permission> getPermissions() {
         try {
@@ -136,7 +131,6 @@ public class NexusAccessService {
         }
     }
 
-
     /**
      * Error during the call to NexusServices.
      * Handles cases where the error is neither a 4xx nor a 5xx. Examples: NexusServices is unavailable;
@@ -151,6 +145,5 @@ public class NexusAccessService {
     void setWebClientProvider(WebClientProvider webClientProvider) {
         this.webClientProvider = webClientProvider;
     }
-
 
 }
