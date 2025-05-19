@@ -68,7 +68,7 @@ public class Application implements CommandLineRunner {
                 case "permissions", "3":
                     if (args.length > 1) {
                         var userId = args[1].toUpperCase(ENGLISH);
-                        permissionService.showPermissions(userId);
+                        permissionService.showUserPermissions(userId);
                     } else {
                         System.out.println("Please provide a user ID for the 'permission' option.");
                     }

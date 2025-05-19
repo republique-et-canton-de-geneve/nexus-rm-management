@@ -132,6 +132,26 @@ public class NexusAccessService {
     }
 
     /**
+     * Call to NexusServices.
+     */
+    public List<User> getUser(String userId) {
+        try {
+            var uri = "/v1/security/users?userId=" + userId;
+            return Arrays.asList(Objects.requireNonNull(webClientProvider.getWebClient()
+                    .get()
+                    .uri(uri)
+                    .accept(APPLICATION_JSON)
+                    .header("Authorization", "Basic " + token)
+                    .retrieve()
+                    .bodyToMono(User[].class)
+                    .block()));
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
      * Error during the call to NexusServices.
      * Handles cases where the error is neither a 4xx nor a 5xx. Examples: NexusServices is unavailable;
      * the URL of NexusServices is incorrect.

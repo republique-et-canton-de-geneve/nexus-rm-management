@@ -49,22 +49,22 @@ public class PermissionService {
     @Value("${app.security.token-base64}")
     private String token;
 
-    public void showPermissions(String userId) {
-        List<User> users = nexusAccessService.getUsers().stream()
-                .filter(role -> role.getUserId().equalsIgnoreCase(userId))
-                .toList();
+    /**
+     * Displays the permissions of a user.
+     */
+    public void showUserPermissions(String userId) {
+        List<User> users = nexusAccessService.getUser(userId);
 
         if (users.isEmpty()) {
             log.info("User [{}] not found", userId);
         } else {
-            for (User user : users) {
-                log.info(user.toString());
-            }
-            writePermissionsToExcel(users);
+            var user = users.getFirst();
+            log.info(user.toString());
+            writePermissionsToExcel(user);
         }
     }
 
-    private void writePermissionsToExcel(List<User> permissions) {
+    private void writePermissionsToExcel(User user) {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Permissions");
 
@@ -77,9 +77,7 @@ public class PermissionService {
         writeHeaderRow(sheet, titleStyle);
 
         int rowNum = 1; // row 0 is the header
-        for (User user : permissions) {
-            rowNum = writePermissionRows(sheet, user, rowNum, lightGreyStyle, whiteStyle);
-        }
+        writePermissionRows(sheet, user, rowNum, lightGreyStyle, whiteStyle);
 
         // Auto-size columns
         autoSizeColumns(sheet);
@@ -411,4 +409,5 @@ public class PermissionService {
             log.error("Error writing Excel file", e);
         }
     }
+
 }
