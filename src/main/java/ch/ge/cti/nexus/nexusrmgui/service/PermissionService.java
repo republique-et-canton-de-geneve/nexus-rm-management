@@ -18,7 +18,7 @@ package ch.ge.cti.nexus.nexusrmgui.service;
 import ch.ge.cti.nexus.nexusrmgui.WebClientProvider;
 import ch.ge.cti.nexus.nexusrmgui.business.NexusAccessService;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.ContentSelectorResponse;
-import ch.ge.cti.nexus.nexusrmgui.business.permission.Permission;
+import ch.ge.cti.nexus.nexusrmgui.business.permission.User;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.PrivilegeResponse;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.RoleResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -51,21 +50,21 @@ public class PermissionService {
     private String token;
 
     public void showPermissions(String userId) {
-        List<Permission> roles = nexusAccessService.getPermissions().stream()
+        List<User> users = nexusAccessService.getUsers().stream()
                 .filter(role -> role.getUserId().equalsIgnoreCase(userId))
                 .toList();
 
-        if (roles.isEmpty()) {
-            log.info("No roles found for user: " + userId);
+        if (users.isEmpty()) {
+            log.info("User [{}] not found", userId);
         } else {
-            for (Permission permission : roles) {
-                log.info(permission.toString());
+            for (User user : users) {
+                log.info(user.toString());
             }
-            writePermissionsToExcel(roles);
+            writePermissionsToExcel(users);
         }
     }
 
-    private void writePermissionsToExcel(List<Permission> permissions) {
+    private void writePermissionsToExcel(List<User> permissions) {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Permissions");
 
@@ -78,8 +77,8 @@ public class PermissionService {
         writeHeaderRow(sheet, titleStyle);
 
         int rowNum = 1; // row 0 is the header
-        for (Permission permission : permissions) {
-            rowNum = writePermissionRows(sheet, permission, rowNum, lightGreyStyle, whiteStyle);
+        for (User user : permissions) {
+            rowNum = writePermissionRows(sheet, user, rowNum, lightGreyStyle, whiteStyle);
         }
 
         // Auto-size columns
@@ -115,15 +114,15 @@ public class PermissionService {
         }
     }
 
-    private int writePermissionRows(Sheet sheet, Permission permission, int rowNum, CellStyle lightGreyStyle, CellStyle whiteStyle) {
-        String userId = permission.getUserId().toUpperCase();
+    private int writePermissionRows(Sheet sheet, User user, int rowNum, CellStyle lightGreyStyle, CellStyle whiteStyle) {
+        String userId = user.getUserId().toUpperCase();
 
-        List<String> roles = permission.getRoles().stream()
+        List<String> roles = user.getRoles().stream()
                 .map(String::toUpperCase)
                 .filter(role -> !role.startsWith("NX"))
                 .toList();
 
-        List<String> externalRoles = permission.getExternalRoles().stream()
+        List<String> externalRoles = user.getExternalRoles().stream()
                 .map(String::toUpperCase)
                 .toList();
 

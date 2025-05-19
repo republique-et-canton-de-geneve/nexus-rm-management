@@ -24,7 +24,7 @@ import java.util.List;
 @Data
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Permission {
+public class User {
 
     private String userId;
 

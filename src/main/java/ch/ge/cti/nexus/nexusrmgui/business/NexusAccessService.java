@@ -18,7 +18,7 @@ package ch.ge.cti.nexus.nexusrmgui.business;
 import ch.ge.cti.nexus.nexusrmgui.WebClientProvider;
 import ch.ge.cti.nexus.nexusrmgui.business.certificate.Certificate;
 import ch.ge.cti.nexus.nexusrmgui.business.component.ComponentResponse;
-import ch.ge.cti.nexus.nexusrmgui.business.permission.Permission;
+import ch.ge.cti.nexus.nexusrmgui.business.permission.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -114,7 +114,7 @@ public class NexusAccessService {
     /**
      * Call to NexusServices.
      */
-    public List<Permission> getPermissions() {
+    public List<User> getUsers() {
         try {
             var uri = "/v1/security/users";
             return Arrays.asList(Objects.requireNonNull(webClientProvider.getWebClient()
@@ -123,7 +123,7 @@ public class NexusAccessService {
                     .accept(APPLICATION_JSON)
                     .header("Authorization", "Basic " + token)
                     .retrieve()
-                    .bodyToMono(Permission[].class)
+                    .bodyToMono(User[].class)
                     .block()));
         } catch (RuntimeException e) {
             handleInvocationError(e);
