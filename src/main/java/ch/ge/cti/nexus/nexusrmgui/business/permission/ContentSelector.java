@@ -18,20 +18,16 @@ package ch.ge.cti.nexus.nexusrmgui.business.permission;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PrivilegeResponse {
+public class ContentSelector {
 
-    private String id;
-    private String source;
     private String name;
+
+    private String type;
+
     private String description;
-    private boolean readOnly;
-    private String contentSelector;
-    private List<String> privileges;
-    private List<String> roles;
-    private List<String> externalRoles;
-    private List<String> actions;
+
+    private String expression;
+
 }

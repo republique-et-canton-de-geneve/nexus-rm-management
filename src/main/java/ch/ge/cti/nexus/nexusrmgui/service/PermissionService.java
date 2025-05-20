@@ -17,12 +17,19 @@ package ch.ge.cti.nexus.nexusrmgui.service;
 
 import ch.ge.cti.nexus.nexusrmgui.WebClientProvider;
 import ch.ge.cti.nexus.nexusrmgui.business.NexusAccessService;
-import ch.ge.cti.nexus.nexusrmgui.business.permission.ContentSelectorResponse;
+import ch.ge.cti.nexus.nexusrmgui.business.permission.ContentSelector;
+import ch.ge.cti.nexus.nexusrmgui.business.permission.Privilege;
+import ch.ge.cti.nexus.nexusrmgui.business.permission.Role;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.User;
-import ch.ge.cti.nexus.nexusrmgui.business.permission.PrivilegeResponse;
-import ch.ge.cti.nexus.nexusrmgui.business.permission.RoleResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,7 +39,12 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -140,21 +152,31 @@ public class PermissionService {
         return rowNum;
     }
 
-    private int writeRoleWithSubRoles(Sheet sheet, String userId, String role, String parentRole, String parentExternalRole, int rowNum, CellStyle lightGreyStyle, CellStyle whiteStyle, Set<String> processedRoles) {
-        if (processedRoles.contains(role)) {
+    private int writeRoleWithSubRoles(
+            Sheet sheet,
+            String userId,
+            String roleId,
+            String parentRole,
+            String parentExternalRole,
+            int rowNum,
+            CellStyle lightGreyStyle,
+            CellStyle whiteStyle,
+            Set<String> processedRoles) {
+
+        if (processedRoles.contains(roleId)) {
             return rowNum;
         }
-        processedRoles.add(role);
+        processedRoles.add(roleId);
 
-        List<String> privileges = getPrivilegesForRole(role);
-        List<String> subRoles = getSubRolesForRole(role);
+        Optional<Role> role = nexusAccessService.getRole(roleId);
 
-        if (privileges.isEmpty()) {
+        List<String> privilegeNames = role.map(Role::getPrivileges).orElse(Collections.emptyList());
+        if (privilegeNames.isEmpty()) {
             CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
             Row row = sheet.createRow(rowNum++);
             createCell(row, 0, userId, rowStyle);
-            createCell(row, 1, parentRole.isEmpty() ? role : parentRole, rowStyle);
-            createCell(row, 2, parentRole.isEmpty() ? "" : role, rowStyle);
+            createCell(row, 1, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
+            createCell(row, 2, parentRole.isEmpty() ? "" : roleId, rowStyle);
             createCell(row, 3, "", rowStyle);
             createCell(row, 4, "", rowStyle);
             createCell(row, 5, "", rowStyle);
@@ -162,74 +184,107 @@ public class PermissionService {
             createCell(row, 7, "", rowStyle);
             createCell(row, 8, "", rowStyle);
         } else {
-            for (String privilege : privileges) {
-                List<String> actions = getActionsForPrivilege(privilege);
-                String contentSelector = getContentSelectorForPrivilege(privilege);
-                String expression = contentSelector.isEmpty() ? "" : getExpressionForContentSelector(contentSelector);
+            for (String privilegeName : privilegeNames) {
+                Optional<Privilege> privilege = nexusAccessService.getPrivilege(privilegeName);
+                List<String> actions = privilege
+                        .map(Privilege::getActions)
+                        .orElse(Collections.emptyList());
+                String contentSelectorName = privilege
+                        .map(Privilege::getContentSelector)
+                        .orElse("");
+
+                String expression = nexusAccessService.getContentSelector(contentSelectorName)
+                        .map(ContentSelector::getExpression)
+                        .orElse("");
 
                 if (actions.isEmpty()) {
                     CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
                     Row row = sheet.createRow(rowNum++);
                     createCell(row, 0, userId, rowStyle);
-                    createCell(row, 1, parentRole.isEmpty() ? role : parentRole, rowStyle);
-                    createCell(row, 2, parentRole.isEmpty() ? "" : role, rowStyle);
+                    createCell(row, 1, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
+                    createCell(row, 2, parentRole.isEmpty() ? "" : roleId, rowStyle);
                     createCell(row, 3, "", rowStyle);
                     createCell(row, 4, "", rowStyle);
-                    createCell(row, 5, privilege, rowStyle);
+                    createCell(row, 5, privilegeName, rowStyle);
                     createCell(row, 6, "", rowStyle);
-                    createCell(row, 7, contentSelector, rowStyle);
+                    createCell(row, 7, contentSelectorName, rowStyle);
                     createCell(row, 8, expression, rowStyle);
                 } else {
                     for (String action : actions) {
                         CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
                         Row row = sheet.createRow(rowNum++);
                         createCell(row, 0, userId, rowStyle);
-                        createCell(row, 1, parentRole.isEmpty() ? role : parentRole, rowStyle);
-                        createCell(row, 2, parentRole.isEmpty() ? "" : role, rowStyle);
+                        createCell(row, 1, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
+                        createCell(row, 2, parentRole.isEmpty() ? "" : roleId, rowStyle);
                         createCell(row, 3, "", rowStyle);
                         createCell(row, 4, "", rowStyle);
-                        createCell(row, 5, privilege, rowStyle);
+                        createCell(row, 5, privilegeName, rowStyle);
                         createCell(row, 6, action, rowStyle);
-                        createCell(row, 7, contentSelector, rowStyle);
+                        createCell(row, 7, contentSelectorName, rowStyle);
                         createCell(row, 8, expression, rowStyle);
                     }
                 }
             }
         }
 
+        List<String> subRoles = role
+                .map(Role::getRoles)
+                .orElse(Collections.emptyList());
         for (String subRole : subRoles) {
-            rowNum = writeRoleWithSubRoles(sheet, userId, subRole, role, parentExternalRole, rowNum, lightGreyStyle, whiteStyle, processedRoles);
+            rowNum = writeRoleWithSubRoles(sheet, userId, subRole, roleId, parentExternalRole, rowNum, lightGreyStyle, whiteStyle, processedRoles);
         }
 
         return rowNum;
     }
 
-    private int writeExternalRoleWithSubRoles(Sheet sheet, String userId, String externalRole, String parentExternalRole, String parentRole, int rowNum, CellStyle lightGreyStyle, CellStyle whiteStyle, Set<String> processedExternalRoles) {
-        if (processedExternalRoles.contains(externalRole)) {
+    private int writeExternalRoleWithSubRoles(
+            Sheet sheet,
+            String userId,
+            String externalRoleId,
+            String parentExternalRole,
+            String parentRole,
+            int rowNum,
+            CellStyle lightGreyStyle,
+            CellStyle whiteStyle,
+            Set<String> processedExternalRoles) {
+
+        if (processedExternalRoles.contains(externalRoleId)) {
             return rowNum;
         }
-        processedExternalRoles.add(externalRole);
+        processedExternalRoles.add(externalRoleId);
 
-        List<String> privileges = getPrivilegesForRole(externalRole);
-        List<String> subExternalRoles = getSubRolesForRole(externalRole);
+        Optional<Role> role = nexusAccessService.getRole(externalRoleId);
 
-        if (privileges.isEmpty()) {
+        List<String> privilegeNames = role
+                .map(Role::getPrivileges)
+                .orElse(new ArrayList<>());
+
+        if (privilegeNames.isEmpty()) {
             CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
             Row row = sheet.createRow(rowNum++);
             createCell(row, 0, userId, rowStyle);
             createCell(row, 1, "", rowStyle);
             createCell(row, 2, "", rowStyle);
-            createCell(row, 3, parentExternalRole.isEmpty() ? externalRole : parentExternalRole, rowStyle);
-            createCell(row, 4, parentExternalRole.isEmpty() ? "" : externalRole, rowStyle);
+            createCell(row, 3, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
+            createCell(row, 4, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
             createCell(row, 5, "", rowStyle);
             createCell(row, 6, "", rowStyle);
             createCell(row, 7, "", rowStyle);
             createCell(row, 8, "", rowStyle);
         } else {
-            for (String privilege : privileges) {
-                List<String> actions = getActionsForPrivilege(privilege);
-                String contentSelector = getContentSelectorForPrivilege(privilege);
-                String expression = contentSelector.isEmpty() ? "" : getExpressionForContentSelector(contentSelector);
+            for (String privilegeName : privilegeNames) {
+                Optional<Privilege> privilege = nexusAccessService.getPrivilege(privilegeName);
+                List<String> actions = privilege
+                        .map(Privilege::getActions)
+                        .orElse(Collections.emptyList());
+                String contentSelectorName = privilege
+                        .map(Privilege::getContentSelector)
+                        .orElse("");
+
+                String expression = contentSelectorName.isEmpty() ? "" : nexusAccessService
+                        .getContentSelector(contentSelectorName)
+                        .map(ContentSelector::getExpression)
+                        .orElse("");
 
                 if (actions.isEmpty()) {
                     CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
@@ -237,11 +292,11 @@ public class PermissionService {
                     createCell(row, 0, userId, rowStyle);
                     createCell(row, 1, "", rowStyle);
                     createCell(row, 2, "", rowStyle);
-                    createCell(row, 3, parentExternalRole.isEmpty() ? externalRole : parentExternalRole, rowStyle);
-                    createCell(row, 4, parentExternalRole.isEmpty() ? "" : externalRole, rowStyle);
-                    createCell(row, 5, privilege, rowStyle);
+                    createCell(row, 3, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
+                    createCell(row, 4, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
+                    createCell(row, 5, privilegeName, rowStyle);
                     createCell(row, 6, "", rowStyle);
-                    createCell(row, 7, contentSelector, rowStyle);
+                    createCell(row, 7, contentSelectorName, rowStyle);
                     createCell(row, 8, expression, rowStyle);
                 } else {
                     for (String action : actions) {
@@ -250,132 +305,25 @@ public class PermissionService {
                         createCell(row, 0, userId, rowStyle);
                         createCell(row, 1, "", rowStyle);
                         createCell(row, 2, "", rowStyle);
-                        createCell(row, 3, parentExternalRole.isEmpty() ? externalRole : parentExternalRole, rowStyle);
-                        createCell(row, 4, parentExternalRole.isEmpty() ? "" : externalRole, rowStyle);
-                        createCell(row, 5, privilege, rowStyle);
+                        createCell(row, 3, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
+                        createCell(row, 4, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
+                        createCell(row, 5, privilegeName, rowStyle);
                         createCell(row, 6, action, rowStyle);
-                        createCell(row, 7, contentSelector, rowStyle);
+                        createCell(row, 7, contentSelectorName, rowStyle);
                         createCell(row, 8, expression, rowStyle);
                     }
                 }
             }
         }
 
+        List<String> subExternalRoles = role
+                .map(Role::getRoles)
+                .orElse(new ArrayList<>());
         for (String subExternalRole : subExternalRoles) {
-            rowNum = writeExternalRoleWithSubRoles(sheet, userId, subExternalRole, externalRole, parentRole, rowNum, lightGreyStyle, whiteStyle, processedExternalRoles);
+            rowNum = writeExternalRoleWithSubRoles(sheet, userId, subExternalRole, externalRoleId, parentRole, rowNum, lightGreyStyle, whiteStyle, processedExternalRoles);
         }
 
         return rowNum;
-    }
-
-    private List<String> getPrivilegesForRole(String role) {
-        try {
-            String uri = "/v1/security/roles/" + role;
-            RoleResponse response = webClientProvider.getWebClient()
-                    .get()
-                    .uri(uri)
-                    .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
-                    .retrieve()
-                    .bodyToMono(RoleResponse.class)
-                    .block();
-            if (response != null && response.getPrivileges() != null) {
-                return response.getPrivileges();
-            }
-        } catch (WebClientResponseException.NotFound e) {
-            log.warn("Role not found: " + role);
-        } catch (RuntimeException e) {
-            log.error("Error fetching privileges for role: " + role, e);
-        }
-        return List.of(); // Return an empty list if there was an error or no privileges
-    }
-
-    private List<String> getSubRolesForRole(String role) {
-        try {
-            String uri = "/v1/security/roles/" + role;
-            RoleResponse response = webClientProvider.getWebClient()
-                    .get()
-                    .uri(uri)
-                    .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
-                    .retrieve()
-                    .bodyToMono(RoleResponse.class)
-                    .block();
-            if (response != null && response.getRoles() != null) {
-                return response.getRoles();
-            }
-        } catch (WebClientResponseException.NotFound e) {
-            log.warn("Role not found: " + role);
-        } catch (RuntimeException e) {
-            log.error("Error fetching sub-roles for role: " + role, e);
-        }
-        return List.of(); // Return an empty list if there was an error or no sub-roles
-    }
-
-    private String getContentSelectorForPrivilege(String privilege) {
-        try {
-            String uri = "/v1/security/privileges/" + privilege;
-            PrivilegeResponse response = webClientProvider.getWebClient()
-                    .get()
-                    .uri(uri)
-                    .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
-                    .retrieve()
-                    .bodyToMono(PrivilegeResponse.class)
-                    .block();
-            if (response != null && response.getContentSelector() != null) {
-                return response.getContentSelector();
-            }
-        } catch (WebClientResponseException.NotFound e) {
-            log.warn("Privilege not found: " + privilege);
-        } catch (RuntimeException e) {
-            log.error("Error fetching content selector for privilege: " + privilege, e);
-        }
-        return ""; // Return an empty string if there was an error or no content selector
-    }
-
-    private String getExpressionForContentSelector(String contentSelector) {
-        try {
-            String uri = "/v1/security/content-selectors/" + contentSelector;
-            ContentSelectorResponse response = webClientProvider.getWebClient()
-                    .get()
-                    .uri(uri)
-                    .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
-                    .retrieve()
-                    .bodyToMono(ContentSelectorResponse.class)
-                    .block();
-            if (response != null && response.getExpression() != null) {
-                return response.getExpression();
-            }
-        } catch (WebClientResponseException.NotFound e) {
-            log.warn("Content selector not found: " + contentSelector);
-        } catch (RuntimeException e) {
-            log.error("Error fetching expression for content selector: " + contentSelector, e);
-        }
-        return ""; // Return an empty string if there was an error or no expression
-    }
-
-    private List<String> getActionsForPrivilege(String privilege) {
-        try {
-            String uri = "/v1/security/privileges/" + privilege;
-            PrivilegeResponse response = webClientProvider.getWebClient()
-                    .get()
-                    .uri(uri)
-                    .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
-                    .retrieve()
-                    .bodyToMono(PrivilegeResponse.class)
-                    .block();
-            if (response != null && response.getActions() != null) {
-                return response.getActions();
-            }
-        } catch (WebClientResponseException.NotFound e) {
-            log.warn("Privilege not found: " + privilege);
-        } catch (RuntimeException e) {
-            log.error("Error fetching actions for privilege: " + privilege, e);
-        }
-        return List.of(); // Return an empty list if there was an error or no actions
     }
 
     private void createCell(Row row, int column, String value, CellStyle style) {

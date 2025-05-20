@@ -22,14 +22,26 @@ import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RoleResponse {
+public class Privilege {
 
     private String id;
+
     private String source;
+
     private String name;
+
     private String description;
+
     private boolean readOnly;
+
+    private String contentSelector;
+
     private List<String> privileges;
+
     private List<String> roles;
+
     private List<String> externalRoles;
+
+    private List<String> actions;
+
 }

@@ -18,16 +18,21 @@ package ch.ge.cti.nexus.nexusrmgui.business;
 import ch.ge.cti.nexus.nexusrmgui.WebClientProvider;
 import ch.ge.cti.nexus.nexusrmgui.business.certificate.Certificate;
 import ch.ge.cti.nexus.nexusrmgui.business.component.ComponentResponse;
+import ch.ge.cti.nexus.nexusrmgui.business.permission.ContentSelector;
+import ch.ge.cti.nexus.nexusrmgui.business.permission.Privilege;
+import ch.ge.cti.nexus.nexusrmgui.business.permission.Role;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -51,9 +56,6 @@ public class NexusAccessService {
     @Resource
     private WebClientProvider webClientProvider;
 
-    /**
-     * Call to NexusServices.
-     */
     public Certificate[] getCertificats() {
         try {
             var uri = "/v1/security/ssl/truststore";
@@ -71,9 +73,6 @@ public class NexusAccessService {
         }
     }
 
-    /**
-     * Call to NexusServices.
-     */
     public ComponentResponse getComponents(String continuationToken) {
         try {
             var uri = "/v1/components?repository=project_release";
@@ -111,9 +110,6 @@ public class NexusAccessService {
         }
     }
 
-    /**
-     * Call to NexusServices.
-     */
     public List<User> getUsers() {
         try {
             var uri = "/v1/security/users";
@@ -131,9 +127,6 @@ public class NexusAccessService {
         }
     }
 
-    /**
-     * Call to NexusServices.
-     */
     public List<User> getUser(String userId) {
         try {
             var uri = "/v1/security/users?userId=" + userId;
@@ -151,6 +144,72 @@ public class NexusAccessService {
         }
     }
 
+    public Optional<Role> getRole(String roleId) {
+        Role role = null;
+
+        try {
+            var uri = "/v1/security/roles/" + roleId;
+            role = webClientProvider.getWebClient()
+                    .get()
+                    .uri(uri)
+                    .accept(APPLICATION_JSON)
+                    .header("Authorization", "Basic " + token)
+                    .retrieve()
+                    .bodyToMono(Role.class)
+                    .block();
+        } catch (WebClientResponseException.NotFound e) {
+            log.warn("Role not found: " + roleId);
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+        }
+
+        return Optional.ofNullable(role);
+    }
+
+    public Optional<Privilege> getPrivilege(String privilegeName) {
+        Privilege privilege = null;
+
+        try {
+            var uri = "/v1/security/privileges/" + privilegeName;
+            privilege = webClientProvider.getWebClient()
+                    .get()
+                    .uri(uri)
+                    .accept(APPLICATION_JSON)
+                    .header("Authorization", "Basic " + token)
+                    .retrieve()
+                    .bodyToMono(Privilege.class)
+                    .block();
+        } catch (WebClientResponseException.NotFound e) {
+            log.warn("Privilege not found: " + privilegeName);
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+        }
+
+        return Optional.ofNullable(privilege);
+    }
+
+    public Optional<ContentSelector> getContentSelector(String contentSelectorName) {
+        ContentSelector contentSelector = null;
+
+        try {
+            var uri = "/v1/security/content-selectors/" + contentSelectorName;
+            contentSelector = webClientProvider.getWebClient()
+                    .get()
+                    .uri(uri)
+                    .accept(APPLICATION_JSON)
+                    .header("Authorization", "Basic " + token)
+                    .retrieve()
+                    .bodyToMono(ContentSelector.class)
+                    .block();
+        } catch (WebClientResponseException.NotFound e) {
+            log.warn("Content selector not found: " + contentSelectorName);
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+        }
+
+        return Optional.ofNullable(contentSelector);
+    }
+
     /**
      * Error during the call to NexusServices.
      * Handles cases where the error is neither a 4xx nor a 5xx. Examples: NexusServices is unavailable;
@@ -160,10 +219,6 @@ public class NexusAccessService {
      */
     private void handleInvocationError(RuntimeException exception) {
         log.error("Error during the call to Nexus :", exception);
-    }
-
-    void setWebClientProvider(WebClientProvider webClientProvider) {
-        this.webClientProvider = webClientProvider;
     }
 
 }
