@@ -32,4 +32,6 @@ public class User {
 
     private List<String> externalRoles;
 
+    private String source;
+
 }

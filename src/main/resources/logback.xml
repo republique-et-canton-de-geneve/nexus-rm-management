@@ -3,7 +3,10 @@
     <!-- Console appender -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
+            <!--
             <pattern>%date{HH:mm:ss.SSS} %-5level %msg  [%logger{5}]%n</pattern>
+            -->
+            <pattern>%date{HH:mm:ss} %-5level %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -15,7 +18,10 @@
             <totalSizeCap>10MB</totalSizeCap>
         </rollingPolicy>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--
             <pattern>%date{HH:mm:ss.SSS} %-5level [%t]  %msg  [%logger{5} L%line] %n</pattern>
+            -->
+            <pattern>%date{HH:mm:ss} %-5level  %msg%n</pattern>
         </encoder>
     </appender>
 

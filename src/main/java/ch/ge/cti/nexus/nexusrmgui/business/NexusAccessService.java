@@ -112,7 +112,8 @@ public class NexusAccessService {
 
     public List<User> getUsers() {
         try {
-            var uri = "/v1/security/users";
+            var uri = "/v1/security/users?source=default";
+    //        var uri = "/v1/security/users";    // ne rend pas tous les utilisateurs LDAP
             return Arrays.asList(Objects.requireNonNull(webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
@@ -162,6 +163,10 @@ public class NexusAccessService {
     }
 
     public Optional<Role> getRole(String roleId) {
+        return getRole(roleId, true);
+    }
+
+    public Optional<Role> getRole(String roleId, boolean printWarningIfNotFound) {
         Role role = null;
 
         try {
@@ -175,12 +180,31 @@ public class NexusAccessService {
                     .bodyToMono(Role.class)
                     .block();
         } catch (WebClientResponseException.NotFound e) {
-            log.warn("Role not found: " + roleId);
+            if (printWarningIfNotFound) {
+                log.warn("Role not found: " + roleId);
+            }
         } catch (RuntimeException e) {
             handleInvocationError(e);
         }
 
         return Optional.ofNullable(role);
+    }
+
+    public void updateRole(Role role) {
+        try {
+            var uri = "/v1/security/roles/" + role.getId();
+            webClientProvider.getWebClient()
+                    .put()
+                    .uri(uri)
+                    .contentType(APPLICATION_JSON)
+                    .header("Authorization", "Basic " + token)
+                    .bodyValue(role)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+        }
     }
 
     public List<Privilege> getPrivileges() {
@@ -222,7 +246,45 @@ public class NexusAccessService {
         return Optional.ofNullable(privilege);
     }
 
+    public void removePrivilege(String privilegeName) {
+        try {
+            var uri = "/v1/security/privileges/" + privilegeName;
+            webClientProvider.getWebClient()
+                    .delete()
+                    .uri(uri)
+                    .header("Authorization", "Basic " + token)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (WebClientResponseException.NotFound e) {
+            log.warn("Privilege not found: " + privilegeName);
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+        }
+    }
+
+    public void createPrivilege(Privilege privilege) {
+        try {
+            var uri = "/v1/security/privileges/repository-content-selector";
+            webClientProvider.getWebClient()
+                    .post()
+                    .uri(uri)
+                    .contentType(APPLICATION_JSON)
+                    .header("Authorization", "Basic " + token)
+                    .bodyValue(privilege)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+        }
+    }
+
     public Optional<ContentSelector> getContentSelector(String contentSelectorName) {
+        return getContentSelector(contentSelectorName, true);
+    }
+
+    public Optional<ContentSelector> getContentSelector(String contentSelectorName, boolean printWarningIfNotFound) {
         ContentSelector contentSelector = null;
 
         try {
@@ -236,7 +298,9 @@ public class NexusAccessService {
                     .bodyToMono(ContentSelector.class)
                     .block();
         } catch (WebClientResponseException.NotFound e) {
-            log.warn("Content selector not found: " + contentSelectorName);
+            if (printWarningIfNotFound) {
+                log.warn("Content selector not found: " + contentSelectorName);
+            }
         } catch (RuntimeException e) {
             handleInvocationError(e);
         }

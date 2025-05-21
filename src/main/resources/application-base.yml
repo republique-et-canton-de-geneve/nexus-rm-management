@@ -6,6 +6,15 @@ app:
   nexus:
     connection-timeout-milliseconds: 5000
     response-timeout-milliseconds: 30000
+    content-selector:
+      prefix: MISSING
+    repo:
+      d: MISSING
+      s: MISSING
+      r: MISSING
+      p: MISSING
+    role:
+      prefix: MISSING
     ssl:
       enabled: true
     url: MISSING

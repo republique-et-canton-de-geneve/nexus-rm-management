@@ -18,6 +18,7 @@ package ch.ge.cti.nexus.nexusrmgui;
 import ch.ge.cti.nexus.nexusrmgui.service.CertificateService;
 import ch.ge.cti.nexus.nexusrmgui.service.ComponentService;
 import ch.ge.cti.nexus.nexusrmgui.service.PermissionService;
+import ch.ge.cti.nexus.nexusrmgui.service.YdpService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -38,6 +39,9 @@ public class Application implements CommandLineRunner {
 
     @Resource
     private PermissionService permissionService;
+
+    @Resource
+    private YdpService ydpService;
 
     int days;
 
@@ -80,6 +84,16 @@ public class Application implements CommandLineRunner {
                         dryRun = false;
                     }
                     componentService.deleteComponents(dryRun);
+                    break;
+                case "5":
+                    ydpService.getSensitiveDockerPrivileges();
+                    break;
+                case "6":
+                    ydpService.fixDockerPrivileges();
+                    break;
+                case "7":
+                    var usersByRole = permissionService.getUsersByRole();
+                    log.info("Users by role: {}", usersByRole);
                     break;
                 default:
                     System.out.println("Invalid option. Use 'certificate' or '1' for certificates, 'heavyComponents' or '2' for heavyComponents, 'permissions' or '3' for permissions, 'deleteComponents' or '4' for deleteComponents.");

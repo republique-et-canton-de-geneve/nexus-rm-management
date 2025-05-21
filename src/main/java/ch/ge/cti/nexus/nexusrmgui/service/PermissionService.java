@@ -40,11 +40,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -74,6 +79,98 @@ public class PermissionService {
             log.info(user.toString());
             writePermissionsToExcel(user);
         }
+    }
+
+    /**
+     * Returns a Map containing all users by role.
+     * Accounts for the fact that a role can have subroles (recursively) and external roles (also recursively).
+     * Only the roles having at least one user are returned.
+     * @return a Map where:
+     *   A key is a role.
+     *   A value is a list of user names
+     */
+    public Map<String, Set<String>> getUsersByRole() {
+        log.info("Getting users by role");
+        var usersToRoles = new HashMap<String, Set<String>>();
+
+        var users = nexusAccessService.getUsers();
+        log.info("nb users = {}", users.size());
+        users.sort(Comparator.comparing(User::getUserId));
+        users.forEach(user -> log.info("  user {}", user.getUserId()));
+
+        nexusAccessService.getUsers()    // ATTENTION : NE TROUVE PAS TOUS LES USERS
+                .stream()
+                .sorted(Comparator.comparing(User::getUserId))
+//                .peek(user -> log.info("{}", user.getUserId()))
+                .forEach(user -> {
+                        // direct roles
+                        var rolesOfUser = user.getRoles().stream()
+                                .flatMap(roleName -> getRoles(roleName).stream())
+                                .map(Role::getName)
+                                .collect(Collectors.toSet());
+//                        log.info("Direct roles of {}: {}", user.getUserId(), rolesOfUser);
+                        usersToRoles.put(user.getUserId(), rolesOfUser);
+
+                        // external roles
+                        var externalRolesOfUser = user.getExternalRoles().stream()
+                                .flatMap(roleName -> getRoles(roleName).stream())
+                                .map(Role::getName)
+                                .collect(Collectors.toSet());
+//                        log.info("External roles of {}: {}", user.getUserId(), externalRolesOfUser);
+
+                        // les deux
+                        rolesOfUser.addAll(externalRolesOfUser);
+                        usersToRoles.put(user.getUserId(), rolesOfUser);
+                });
+
+        // invert the map : from <user, roles> to <role, users>
+        var ret = new HashMap<String, Set<String>>();
+        usersToRoles
+                .forEach((user, userRoles) ->
+                    userRoles.stream()
+                            .forEach(roleName -> {
+                                if (ret.get(roleName) == null) {
+                                    ret.put(roleName, new HashSet<>(Arrays.asList(user)));
+                                } else {
+                                    ret.get(roleName).add(user);
+                                }
+                            })
+                );
+        return ret;
+    }
+
+    /**
+     * Returns a list containing the specified role, its subroles (recursively) and its external roles (also
+     * recursively.
+     */
+    private List<Role> getRoles(String roleName) {
+        var ret = new ArrayList<Role>();
+
+        // the role itself
+        var optRole = nexusAccessService.getRole(roleName, false);
+        if (optRole.isEmpty()) {
+            return Collections.emptyList();
+        }
+        var role = optRole.get();
+        ret.add(role);
+
+        // its subroles
+        if (role.getRoles() != null) {
+            role.getRoles().stream()
+                    .map(name -> nexusAccessService.getRole(name, false).get())
+                    .flatMap(rol -> getRoles(rol.getName()).stream())
+                    .forEach(ret::add);
+        }
+
+        // its external roles
+        if (role.getExternalRoles() != null) {
+            role.getExternalRoles().stream()
+                    .map(name -> nexusAccessService.getRole(name, false).get())
+                    .flatMap(rol -> getRoles(rol.getName()).stream())
+                    .forEach(ret::add);
+        }
+
+        return ret;
     }
 
     private void writePermissionsToExcel(User user) {
