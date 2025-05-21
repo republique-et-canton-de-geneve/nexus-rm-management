@@ -34,6 +34,12 @@ public class Privilege {
 
     private boolean readOnly;
 
+    private String format;
+
+    private String repository;
+
+    private String type;
+
     private String contentSelector;
 
     private List<String> privileges;

@@ -144,6 +144,23 @@ public class NexusAccessService {
         }
     }
 
+    public List<Role> getRoles() {
+        try {
+            var uri = "/v1/security/roles";
+            return Arrays.asList(Objects.requireNonNull(webClientProvider.getWebClient()
+                    .get()
+                    .uri(uri)
+                    .accept(APPLICATION_JSON)
+                    .header("Authorization", "Basic " + token)
+                    .retrieve()
+                    .bodyToMono(Role[].class)
+                    .block()));
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+            return Collections.emptyList();
+        }
+    }
+
     public Optional<Role> getRole(String roleId) {
         Role role = null;
 
@@ -164,6 +181,23 @@ public class NexusAccessService {
         }
 
         return Optional.ofNullable(role);
+    }
+
+    public List<Privilege> getPrivileges() {
+        try {
+            var uri = "/v1/security/privileges";
+            return Arrays.asList(Objects.requireNonNull(webClientProvider.getWebClient()
+                    .get()
+                    .uri(uri)
+                    .accept(APPLICATION_JSON)
+                    .header("Authorization", "Basic " + token)
+                    .retrieve()
+                    .bodyToMono(Privilege[].class)
+                    .block()));
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+            return Collections.emptyList();
+        }
     }
 
     public Optional<Privilege> getPrivilege(String privilegeName) {
