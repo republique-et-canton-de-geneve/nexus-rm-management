@@ -81,8 +81,17 @@ public class Application implements CommandLineRunner {
                     }
                     componentService.deleteComponents(dryRun);
                     break;
+                case "5":
+//                    var roleNamePattern = args[1];
+//                    permissionService.showEmbeddingRoles(roleNamePattern);
+                    permissionService.showEmbeddedRoles();
+                    break;
+                case "6":
+                    var roleNamePattern2 = args[1];
+                    permissionService.getUsersByRole(roleNamePattern2);
+                    break;
                 default:
-                    System.out.println("Invalid option. Use 'certificate' or '1' for certificates, 'heavyComponents' or '2' for heavyComponents, 'permissions' or '3' for permissions, 'deleteComponents' or '4' for deleteComponents.");
+                    System.out.println("Invalid option. Use 'certificate' or '1' for certificates, 'heavyComponents' or '2' for heavyComponents, 'permissions' or '3' for permissions, 'deleteComponents' or '4' for deleteComponents, '5' for embedded roles', '6' for users by role.");
             }
         } else {
             System.out.println("No arguments provided. Use 'certificate' or '1' for certificates, 'heavyComponents' or '2' for heavyComponents, 'permissions' or '3' for permissions, 'deleteComponents' or '4' for deleteComponents. See the README file.");

@@ -162,6 +162,10 @@ public class NexusAccessService {
     }
 
     public Optional<Role> getRole(String roleId) {
+        return getRole(roleId, true);
+    }
+
+    public Optional<Role> getRole(String roleId, boolean printWarningIfNotFound) {
         Role role = null;
 
         try {
@@ -175,7 +179,9 @@ public class NexusAccessService {
                     .bodyToMono(Role.class)
                     .block();
         } catch (WebClientResponseException.NotFound e) {
-            log.warn("Role not found: " + roleId);
+            if (printWarningIfNotFound) {
+                log.warn("Role not found: " + roleId);
+            }
         } catch (RuntimeException e) {
             handleInvocationError(e);
         }

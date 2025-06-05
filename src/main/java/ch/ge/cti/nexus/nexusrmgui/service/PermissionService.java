@@ -15,7 +15,6 @@
 
 package ch.ge.cti.nexus.nexusrmgui.service;
 
-import ch.ge.cti.nexus.nexusrmgui.WebClientProvider;
 import ch.ge.cti.nexus.nexusrmgui.business.NexusAccessService;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.ContentSelector;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Privilege;
@@ -33,20 +32,22 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -54,9 +55,6 @@ public class PermissionService {
 
     @Resource
     private NexusAccessService nexusAccessService;
-
-    @Resource
-    private WebClientProvider webClientProvider;
 
     @Value("${app.security.token-base64}")
     private String token;
@@ -75,6 +73,177 @@ public class PermissionService {
             writePermissionsToExcel(user);
         }
     }
+
+    /**
+     * Displays the list of all roles which contain, directly or recursively,
+     * the specified role.
+     *
+     * A DETRUIRE : PLANTE A CAUSE DE ROLES EN DOUBLONS
+    public void showEmbeddingRoles(String roleNamePattern) {
+        getEmbeddingRolesByRole().entrySet().stream()
+                .filter(e -> e.getKey().matches(roleNamePattern))
+                .forEach(e -> log.info("{}: {}", e.getKey(), e.getValue()));
+    }
+     */
+
+    public void showEmbeddedRoles() {
+        getEmbeddedRolesByRole().entrySet().stream()
+                .map(e -> {
+                        var embeddedRoles = e.getValue();
+                        var embeddedRoleNames = embeddedRoles.stream()
+                                       .map(Role::getName)
+                                       .toList();
+                        return e.getKey().getName() + ": " + embeddedRoleNames;
+                })
+                .sorted()
+                .forEach(s -> log.info("{}", s));
+    }
+
+    public void getUsersByRole(String roleNamePattern) {
+        // get
+        Set<String> usersWithRole = new HashSet<>();
+        Map<String, Set<String>> usersByRole = getUsersByRole();
+        usersByRole.forEach((roleName, roleUsers) -> {
+            if (roleName.matches(roleNamePattern)) {
+                usersWithRole.addAll(roleUsers);
+            }
+        });
+
+        // print
+        log.info(usersWithRole.toString());
+    }
+
+    /**
+     * Returns a Map containing all users by role.
+     * Accounts for the fact that a role can have subroles (recursively) and external roles (also recursively).
+     * Only the roles having at least one user are returned.
+     * @return a Map where:
+     *   A key is a role.
+     *   A value is a list of user names
+     */
+    private Map<String, Set<String>> getUsersByRole() {
+        log.info("Getting users by role");
+        var usersToRoles = new HashMap<String, Set<String>>();
+
+        var users = nexusAccessService.getUsers();
+        log.info("nb users = {}", users.size());
+        users.sort(Comparator.comparing(User::getUserId));
+        users.forEach(user -> log.info("  user {}", user.getUserId()));
+
+        nexusAccessService.getUsers()    // ATTENTION : NE TROUVE PAS TOUS LES USERS
+                .stream()
+                .sorted(Comparator.comparing(User::getUserId))
+//                .peek(user -> log.info("{}", user.getUserId()))
+                .forEach(user -> {
+                    // direct roles
+                    var rolesOfUser = user.getRoles().stream()
+                            .flatMap(roleName -> getRoles(roleName).stream())
+                            .map(Role::getName)
+                            .collect(Collectors.toSet());
+//                        log.info("Direct roles of {}: {}", user.getUserId(), rolesOfUser);
+                    usersToRoles.put(user.getUserId(), rolesOfUser);
+
+                    // external roles
+                    var externalRolesOfUser = user.getExternalRoles().stream()
+                            .flatMap(roleName -> getRoles(roleName).stream())
+                            .map(Role::getName)
+                            .collect(Collectors.toSet());
+//                        log.info("External roles of {}: {}", user.getUserId(), externalRolesOfUser);
+
+                    // les deux
+                    rolesOfUser.addAll(externalRolesOfUser);
+                    usersToRoles.put(user.getUserId(), rolesOfUser);
+                });
+
+        // invert the map : from <user, roles> to <role, users>
+        var ret = new HashMap<String, Set<String>>();
+        usersToRoles
+                .forEach((user, userRoles) ->
+                        userRoles.stream()
+                                .forEach(roleName -> {
+                                    if (ret.get(roleName) == null) {
+                                        ret.put(roleName, new HashSet<>(Arrays.asList(user)));
+                                    } else {
+                                        ret.get(roleName).add(user);
+                                    }
+                                })
+                );
+        return ret;
+    }
+
+    /**
+     * For every role, gets the roles embedded by that role.
+     * @return a Map where:
+     *   A key is a role (it cannot be the name of the role, because there are duplicated role names).
+     *   A value is the list of the roles embedded by that role; this includes: the role itself, the
+     *        roles of the role (recursively) and the external roles of the role (recursively)
+     */
+    private Map<Role, List<Role>> getEmbeddedRolesByRole() {
+        var allRoles = nexusAccessService.getRoles();
+        return allRoles.stream()
+                .collect(Collectors.toMap(role -> role, role -> getRoles(role.getName())));
+    }
+
+    /**
+     * For every role, gets the roles which embed that role.
+     * This method returns the inverse result of method getEmbeddedRolesByRole.
+     */
+    private Map<String, List<Role>> getEmbeddingRolesByRole() {
+        Map<String, List<Role>> ret = new HashMap<>();
+
+/*
+        getEmbeddedRolesByRole()
+                .forEach((roleName, embeddedRoles) -> {
+                    embeddedRoles
+                            .forEach(embeddedRole -> {
+                                var embeddedRoleName = embeddedRole.getName();
+                                var embeddingRole = nexusAccessService.getRole(roleName).get();
+                                if (ret.containsKey(embeddedRoleName)) {
+                                    ret.get(embeddedRoleName).add(embeddingRole);
+                                } else {
+                                    ret.put(embeddedRoleName, new ArrayList<>(Arrays.asList(embeddingRole)));
+                                }
+                            });
+        });
+ */
+
+        return ret;
+    }
+
+    /**
+     * Returns a list containing the specified role, its subroles (recursively) and its external roles (also
+     * recursively.
+     */
+    private List<Role> getRoles(String roleName) {
+        var ret = new ArrayList<Role>();
+
+        // the role itself
+        var optRole = nexusAccessService.getRole(roleName, false);
+        if (optRole.isEmpty()) {
+            return Collections.emptyList();
+        }
+        var role = optRole.get();
+        ret.add(role);
+
+        // its subroles
+        if (role.getRoles() != null) {
+            role.getRoles().stream()
+                    .map(name -> nexusAccessService.getRole(name, false).get())
+                    .flatMap(rol -> getRoles(rol.getName()).stream())
+                    .forEach(ret::add);
+        }
+
+        // its external roles
+        if (role.getExternalRoles() != null) {
+            role.getExternalRoles().stream()
+                    .map(name -> nexusAccessService.getRole(name, false).get())
+                    .flatMap(rol -> getRoles(rol.getName()).stream())
+                    .forEach(ret::add);
+        }
+
+        return ret;
+    }
+
 
     private void writePermissionsToExcel(User user) {
         Workbook workbook = new XSSFWorkbook();
