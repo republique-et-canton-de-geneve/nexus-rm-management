@@ -183,6 +183,23 @@ public class NexusAccessService {
         return Optional.ofNullable(role);
     }
 
+    public void updateRole(Role role) {
+        try {
+            var uri = "/v1/security/roles/" + role.getId();
+            webClientProvider.getWebClient()
+                    .put()
+                    .uri(uri)
+                    .contentType(APPLICATION_JSON)
+                    .header("Authorization", "Basic " + token)
+                    .bodyValue(role)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+        }
+    }
+
     public List<Privilege> getPrivileges() {
         try {
             var uri = "/v1/security/privileges";
@@ -220,6 +237,40 @@ public class NexusAccessService {
         }
 
         return Optional.ofNullable(privilege);
+    }
+
+    public void createPrivilege(Privilege privilege) {
+        try {
+            var uri = "/v1/security/privileges/repository-content-selector";
+            webClientProvider.getWebClient()
+                    .post()
+                    .uri(uri)
+                    .contentType(APPLICATION_JSON)
+                    .header("Authorization", "Basic " + token)
+                    .bodyValue(privilege)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+        }
+    }
+
+    public void removePrivilege(String privilegeName) {
+        try {
+            var uri = "/v1/security/privileges/" + privilegeName;
+            webClientProvider.getWebClient()
+                    .delete()
+                    .uri(uri)
+                    .header("Authorization", "Basic " + token)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (WebClientResponseException.NotFound e) {
+            log.warn("Privilege not found: " + privilegeName);
+        } catch (RuntimeException e) {
+            handleInvocationError(e);
+        }
     }
 
     public Optional<ContentSelector> getContentSelector(String contentSelectorName) {
