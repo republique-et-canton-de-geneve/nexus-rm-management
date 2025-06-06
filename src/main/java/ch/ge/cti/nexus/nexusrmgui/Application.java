@@ -85,8 +85,12 @@ public class Application implements CommandLineRunner {
                     permissionService.showEmbeddedRoles();
                     break;
                 case "6":
-                    var roleNamePattern2 = args[1];
-                    permissionService.getUsersByRole(roleNamePattern2);
+                    var roleName = args[1];
+                    permissionService.showUsersHavingRole(roleName);
+                    break;
+                case "7":
+                    var privilegeName = args[1];
+                    permissionService.showRolesHavingPrivilege(privilegeName);
                     break;
                 default:
                     System.out.println("Invalid option. Use 'certificate' or '1' for certificates, 'heavyComponents' or '2' for heavyComponents, 'permissions' or '3' for permissions, 'deleteComponents' or '4' for deleteComponents, '5' for embedded roles, '6' for users by role.");

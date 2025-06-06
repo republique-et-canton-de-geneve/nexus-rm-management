@@ -15,7 +15,6 @@
 
 package ch.ge.cti.nexus.nexusrmgui.business;
 
-import ch.ge.cti.nexus.nexusrmgui.WebClientProvider;
 import ch.ge.cti.nexus.nexusrmgui.business.certificate.Certificate;
 import ch.ge.cti.nexus.nexusrmgui.business.component.ComponentResponse;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.ContentSelector;

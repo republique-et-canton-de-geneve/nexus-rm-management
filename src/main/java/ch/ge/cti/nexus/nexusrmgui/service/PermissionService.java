@@ -89,18 +89,27 @@ public class PermissionService {
                 .forEach(s -> log.info("{}", s));
     }
 
-    public void getUsersByRole(String roleNamePattern) {
-        // get
+    public void showUsersHavingRole(String searchRoleName) {
         Set<String> usersWithRole = new HashSet<>();
-        Map<String, Set<String>> usersByRole = getUsersByRole();
+        Map<String, Set<String>> usersByRole = showUsersHavingRole();
         usersByRole.forEach((roleName, roleUsers) -> {
-            if (roleName.matches(roleNamePattern)) {
+            if (roleName.startsWith(searchRoleName)) {
                 usersWithRole.addAll(roleUsers);
             }
         });
 
-        // print
-        log.info("Users found for role pattern [{}]: {}", roleNamePattern, usersWithRole.toString());
+        log.info("Users found for role name [{}]: {}", searchRoleName, usersWithRole);
+    }
+
+    public void showRolesHavingPrivilege(String searchPrivilegeName) {
+        var roles = nexusAccessService.getRoles().stream()
+                .filter(role -> role.getPrivileges().stream()
+                        .anyMatch(privilegeName -> privilegeName.startsWith(searchPrivilegeName)))
+                .map(Role::getId)
+                .sorted()
+                .toList();
+
+        log.info("Roles having privilege [{}]: {}", searchPrivilegeName, roles);
     }
 
     /**
@@ -111,7 +120,7 @@ public class PermissionService {
      *   A key is a role.
      *   A value is a list of user names
      */
-    private Map<String, Set<String>> getUsersByRole() {
+    private Map<String, Set<String>> showUsersHavingRole() {
         log.info("Getting users by role");
         var usersToRoles = new HashMap<String, Set<String>>();
 
@@ -174,32 +183,6 @@ public class PermissionService {
     }
 
     /**
-     * For every role, gets the roles which embed that role.
-     * This method returns the inverse result of method getEmbeddedRolesByRole.
-     */
-    private Map<String, List<Role>> getEmbeddingRolesByRole() {
-        Map<String, List<Role>> ret = new HashMap<>();
-
-/*
-        getEmbeddedRolesByRole()
-                .forEach((roleName, embeddedRoles) -> {
-                    embeddedRoles
-                            .forEach(embeddedRole -> {
-                                var embeddedRoleName = embeddedRole.getName();
-                                var embeddingRole = nexusAccessService.getRole(roleName).get();
-                                if (ret.containsKey(embeddedRoleName)) {
-                                    ret.get(embeddedRoleName).add(embeddingRole);
-                                } else {
-                                    ret.put(embeddedRoleName, new ArrayList<>(Arrays.asList(embeddingRole)));
-                                }
-                            });
-        });
- */
-
-        return ret;
-    }
-
-    /**
      * Returns a list containing the specified role, its subroles (recursively) and its external roles (also
      * recursively.
      */
@@ -232,7 +215,6 @@ public class PermissionService {
 
         return ret;
     }
-
 
     private void writePermissionsToExcel(User user) {
         Workbook workbook = new XSSFWorkbook();

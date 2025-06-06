@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package ch.ge.cti.nexus.nexusrmgui;
+package ch.ge.cti.nexus.nexusrmgui.business;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContext;
@@ -47,7 +47,6 @@ public class WebClientProvider {
 
     private WebClient webClient;
 
-
     public WebClientProvider(
 
             @Value("${app.nexus.url}")
@@ -76,9 +75,9 @@ public class WebClientProvider {
         if (sslEnabled) {
             // in general, i.e., outside of JUnit tests
             var trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-//            try (FileInputStream inputStream = new FileInputStream(ResourceUtils.getFile(trustStorePath))){
+            //            try (FileInputStream inputStream = new FileInputStream(ResourceUtils.getFile(trustStorePath))){
             try (InputStream inputStream = new ClassPathResource(trustStorePath).getInputStream()) {
-//            try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(trustStorePath)) {
+                //            try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(trustStorePath)) {
                 trustStore.load(inputStream, trustStorePassword.toCharArray());
             }
             var trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -104,7 +103,6 @@ public class WebClientProvider {
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10000000))
                 .build();
     }
-
 
     public WebClient getWebClient() {
         return webClient;
