@@ -74,24 +74,14 @@ public class PermissionService {
         }
     }
 
-    /**
-     * Displays the list of all roles which contain, directly or recursively,
-     * the specified role.
-     *
-     * A DETRUIRE : PLANTE A CAUSE DE ROLES EN DOUBLONS
-    public void showEmbeddingRoles(String roleNamePattern) {
-        getEmbeddingRolesByRole().entrySet().stream()
-                .filter(e -> e.getKey().matches(roleNamePattern))
-                .forEach(e -> log.info("{}: {}", e.getKey(), e.getValue()));
-    }
-     */
-
     public void showEmbeddedRoles() {
         getEmbeddedRolesByRole().entrySet().stream()
                 .map(e -> {
+                        var roleName = e.getKey().getName();
                         var embeddedRoles = e.getValue();
                         var embeddedRoleNames = embeddedRoles.stream()
                                        .map(Role::getName)
+                                       .filter(s -> ! s.equals(roleName))
                                        .toList();
                         return e.getKey().getName() + ": " + embeddedRoleNames;
                 })
@@ -110,7 +100,7 @@ public class PermissionService {
         });
 
         // print
-        log.info(usersWithRole.toString());
+        log.info("Users found for role pattern [{}]: {}", roleNamePattern, usersWithRole.toString());
     }
 
     /**
@@ -126,21 +116,20 @@ public class PermissionService {
         var usersToRoles = new HashMap<String, Set<String>>();
 
         var users = nexusAccessService.getUsers();
-        log.info("nb users = {}", users.size());
+        log.info("Total number of found users = {}. Not all users are found, see the README", users.size());
         users.sort(Comparator.comparing(User::getUserId));
-        users.forEach(user -> log.info("  user {}", user.getUserId()));
 
         nexusAccessService.getUsers()    // ATTENTION : NE TROUVE PAS TOUS LES USERS
                 .stream()
                 .sorted(Comparator.comparing(User::getUserId))
-//                .peek(user -> log.info("{}", user.getUserId()))
+                .peek(user -> log.info("   Processing user {}", user.getUserId()))
                 .forEach(user -> {
                     // direct roles
                     var rolesOfUser = user.getRoles().stream()
                             .flatMap(roleName -> getRoles(roleName).stream())
                             .map(Role::getName)
                             .collect(Collectors.toSet());
-//                        log.info("Direct roles of {}: {}", user.getUserId(), rolesOfUser);
+                        log.debug("Direct roles of {}: {}", user.getUserId(), rolesOfUser);
                     usersToRoles.put(user.getUserId(), rolesOfUser);
 
                     // external roles
@@ -148,7 +137,7 @@ public class PermissionService {
                             .flatMap(roleName -> getRoles(roleName).stream())
                             .map(Role::getName)
                             .collect(Collectors.toSet());
-//                        log.info("External roles of {}: {}", user.getUserId(), externalRolesOfUser);
+                        log.debug("External roles of {}: {}", user.getUserId(), externalRolesOfUser);
 
                     // les deux
                     rolesOfUser.addAll(externalRolesOfUser);
