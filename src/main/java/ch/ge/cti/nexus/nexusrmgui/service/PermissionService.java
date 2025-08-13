@@ -234,7 +234,7 @@ public class PermissionService {
         // Auto-size columns
         autoSizeColumns(sheet);
 
-        saveWorkbook(workbook);
+        saveWorkbook(workbook, user);
     }
 
     private CellStyle createCellStyle(Workbook workbook, IndexedColors color) {
@@ -480,14 +480,14 @@ public class PermissionService {
         }
     }
 
-    private void saveWorkbook(Workbook workbook) {
+    private void saveWorkbook(Workbook workbook, User user) {
         try {
             File outputDir = new File("output");
             if (!outputDir.exists()) {
                 outputDir.mkdir();
             }
             long timestamp = System.currentTimeMillis() / 1000L; // Get current time in Unix format (seconds)
-            String fileName = "permissions_" + timestamp + ".xlsx";
+            String fileName = "permissions_" + user.getUserId() + "_" + timestamp + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);
             fileOut.close();
