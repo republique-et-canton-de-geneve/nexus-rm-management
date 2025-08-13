@@ -280,7 +280,6 @@ public class NexusAccessService {
 
     public Optional<ContentSelector> getContentSelector(String contentSelectorName) {
         ContentSelector contentSelector = null;
-
         try {
             var uri = "/v1/security/content-selectors/" + contentSelectorName;
             contentSelector = webClientProvider.getWebClient()

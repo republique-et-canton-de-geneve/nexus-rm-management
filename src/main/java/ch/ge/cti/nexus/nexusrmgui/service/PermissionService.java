@@ -326,16 +326,20 @@ public class PermissionService {
         } else {
             for (String privilegeName : privilegeNames) {
                 Optional<Privilege> privilege = nexusAccessService.getPrivilege(privilegeName);
-                List<String> actions = privilege
-                        .map(Privilege::getActions)
-                        .orElse(Collections.emptyList());
-                String contentSelectorName = privilege
-                        .map(Privilege::getContentSelector)
-                        .orElse("");
+                if (privilege.isEmpty()) {
+                    log.warn("Privilege [{}] is empty", privilegeName);
+                    continue;
+                }
 
-                String expression = nexusAccessService.getContentSelector(contentSelectorName)
+                List<String> actions = privilege.get().getActions();
+                String contentSelectorName = privilege.get().getContentSelector();  // can be null, for example for the built-in privilege "nx-apikey-all"
+
+                String expression = "";
+                if (contentSelectorName != null) {
+                    expression = nexusAccessService.getContentSelector(contentSelectorName)
                         .map(ContentSelector::getExpression)
                         .orElse("");
+                }
 
                 if (actions.isEmpty()) {
                     CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
