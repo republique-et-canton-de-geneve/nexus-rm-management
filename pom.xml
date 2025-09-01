@@ -29,7 +29,6 @@
 
         <!-- other properties -->
         <java.version>21</java.version>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <dependencies>
