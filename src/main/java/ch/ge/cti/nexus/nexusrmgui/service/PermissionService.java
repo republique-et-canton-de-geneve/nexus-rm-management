@@ -66,7 +66,7 @@ public class PermissionService {
         List<User> users = nexusAccessService.getUser(userId);
 
         if (users.isEmpty()) {
-            log.info("User [{}] not found", userId);
+            log.warn("User [{}] not found", userId);
         } else {
             var user = users.getFirst();
             log.info(user.toString());

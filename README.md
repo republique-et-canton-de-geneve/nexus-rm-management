@@ -15,8 +15,8 @@ Licence:
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-nexus-rm-management : an additional admin console for Nexus RM
-==============================================================
+nexus-rm-management : an additional administration tool for Nexus RM
+==================================
 
 The Nexus RM administration is insufficient.
 This application implements features that the Nexus RM
