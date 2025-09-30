@@ -33,6 +33,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ch.ge.cti.nexus.nexusrmgui.util.ExcelUtils.OUTPUT_DIR;
+
 @Service
 @Slf4j
 public class ComponentService {
@@ -167,7 +169,7 @@ public class ComponentService {
                 firstRow = false;
             }
         }
-        saveWorkbook(workbook, "output", "components");
+        saveWorkbook(workbook, OUTPUT_DIR, "components");
     }
 
 
@@ -226,7 +228,7 @@ public class ComponentService {
             workbook.write(fileOut);
             fileOut.close();
             workbook.close();
-            log.info("Excel file has been generated successfully.");
+            log.info("Excel file has been generated successfully in  your directory ''" + OUTPUT_DIR + "''.");
         } catch (IOException e) {
             log.error("Error writing Excel file", e);
         }
