@@ -21,6 +21,7 @@ import ch.ge.cti.nexus.nexusrmgui.exception.ApplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -33,6 +34,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static ch.ge.cti.nexus.nexusrmgui.util.ExcelUtils.OUTPUT_DIR;
+
 @Service
 @Slf4j
 public class CertificateService {
@@ -40,7 +43,7 @@ public class CertificateService {
     @Resource
     private NexusAccessService nexusAccessService;
 
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
     public List<Certificate> getExpiredCertificates(int days) {
         try {
@@ -160,7 +163,7 @@ public class CertificateService {
 
     private void saveWorkbook(Workbook workbook) {
         try {
-            File outputDir = new File("output");
+            File outputDir = new File(OUTPUT_DIR);
             if (!outputDir.exists()) {
                 outputDir.mkdir();
             }
