@@ -18,6 +18,7 @@ package ch.ge.cti.nexus.nexusrmgui.service;
 import ch.ge.cti.nexus.nexusrmgui.business.certificate.Certificate;
 import ch.ge.cti.nexus.nexusrmgui.business.NexusAccessService;
 import ch.ge.cti.nexus.nexusrmgui.exception.ApplicationException;
+import ch.ge.cti.nexus.nexusrmgui.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -157,7 +158,7 @@ public class CertificateService {
             sheet.autoSizeColumn(i);
         }
     }
-
+    DateUtils utils = new DateUtils();
     private void saveWorkbook(Workbook workbook) {
         try {
             File outputDir = new File("output");
@@ -165,7 +166,7 @@ public class CertificateService {
                 outputDir.mkdir();
             }
             var fileName = "expired_certificates_"
-                    + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date())
+                    +utils.DATEFORMATEE
                     + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);

@@ -20,6 +20,7 @@ import ch.ge.cti.nexus.nexusrmgui.business.permission.ContentSelector;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Privilege;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Role;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.User;
+import ch.ge.cti.nexus.nexusrmgui.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -483,15 +484,14 @@ public class PermissionService {
             sheet.autoSizeColumn(i);
         }
     }
-
+    DateUtils utils = new DateUtils();
     private void saveWorkbook(Workbook workbook, User user) {
         try {
             File outputDir = new File("output");
             if (!outputDir.exists()) {
                 outputDir.mkdir();
             }
-            long timestamp = System.currentTimeMillis() / 1000L; // Get current time in Unix format (seconds)
-            String fileName = "permissions_" + user.getUserId() + "_" + timestamp + ".xlsx";
+            String fileName = "permissions_" + user.getUserId() + "_" + utils.DATEFORMATEE + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);
             fileOut.close();
