@@ -49,8 +49,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ch.ge.cti.nexus.nexusrmgui.util.ExcelUtils.OUTPUT_DIR;
-
 @Service
 @Slf4j
 public class PermissionService {
@@ -91,8 +89,8 @@ public class PermissionService {
                 .forEach(s -> log.info("{}", s));
     }
 
-    Set<String> usersWithRole = new HashSet<>();
     public void showUsersHavingRole(String searchRoleName) {
+        Set<String> usersWithRole = new HashSet<>();
         Map<String, Set<String>> usersByRole = showUsersHavingRole();
         usersByRole.forEach((roleName, roleUsers) -> {
             if (roleName.startsWith(searchRoleName)) {
@@ -488,7 +486,7 @@ public class PermissionService {
 
     private void saveWorkbook(Workbook workbook, User user) {
         try {
-            File outputDir = new File(OUTPUT_DIR);
+            File outputDir = new File("output");
             if (!outputDir.exists()) {
                 outputDir.mkdir();
             }
@@ -498,7 +496,7 @@ public class PermissionService {
             workbook.write(fileOut);
             fileOut.close();
             workbook.close();
-            log.info("Excel file has been generated successfully in your directory ''" + OUTPUT_DIR + "''.");
+            log.info("Excel file has been generated successfully.");
         } catch (IOException e) {
             log.error("Error writing Excel file", e);
         }
