@@ -166,7 +166,7 @@ public class CertificateService {
                 outputDir.mkdir();
             }
             var fileName = "expired_certificates_"
-                    +utils.DATEFORMATEE
+                    +utils.FORMATED_DATE
                     + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);

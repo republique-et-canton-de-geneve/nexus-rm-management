@@ -491,7 +491,7 @@ public class PermissionService {
             if (!outputDir.exists()) {
                 outputDir.mkdir();
             }
-            String fileName = "permissions_" + user.getUserId() + "_" + utils.DATEFORMATEE + ".xlsx";
+            String fileName = "permissions_" + user.getUserId() + "_" + utils.FORMATED_DATE + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);
             fileOut.close();
