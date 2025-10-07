@@ -9,7 +9,7 @@ public class DateUtils {
 
     Date now = new Date();
 
-    public final SimpleDateFormat DATEFORMATEUR = new SimpleDateFormat("yyyyMMdd_HHmmss");
+    public final SimpleDateFormat DATEFORMATEUR = new SimpleDateFormat("ddMMyyyy_HHmmss");
 
     public final String DATEFORMATEE = DATEFORMATEUR.format(now);
 }
