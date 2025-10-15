@@ -58,16 +58,15 @@ public class PermissionService {
     // The columns of the Excel file
     private static final int COLUMN_USER = 0;
     private static final int COLUMN_ROLE = 1;
-    private static final int COLUMN_SUBROLE = 2;
-    private static final int COLUMN_EXTERNAL_ROLE = 3;
-    private static final int COLUMN_SUB_EXTERNAL_ROLE = 4;
-    private static final int COLUMN_PRIVILEGE = 5;
-    private static final int COLUMN_REPOSITORIES = 6;
-    private static final int COLUMN_ACTION = 7;
-    private static final int COLUMN_CONTENT_SELECTOR_NAME = 8;
-    private static final int COLUMN_CONTENT_SELECTOR_EXPRESSION = 9;
+    private static final int COLUMN_ROLE_TYPE = 2;
+    private static final int COLUMN_SUBROLE = 3;
+    private static final int COLUMN_PRIVILEGE = 4;
+    private static final int COLUMN_REPOSITORIES = 5;
+    private static final int COLUMN_ACTION = 6;
+    private static final int COLUMN_CONTENT_SELECTOR_NAME = 7;
+    private static final int COLUMN_CONTENT_SELECTOR_EXPRESSION = 8;
 
-    private final String[] columns = {"User", "Role", "Sub Role", "External Role", "Sub External Role", "Privilege", "Repositories", "Actions", "Content Selector", "Expression"};
+    private final String[] columns = {"User", "Role", "Role Type", "Sub Role", "Privilege", "Repositories", "Actions", "Content Selector", "Expression"};
 
     @Resource
     private NexusAccessService nexusAccessService;
@@ -295,16 +294,15 @@ public class PermissionService {
                 .toList();
 
         Set<String> processedRoles = new HashSet<>();
-        Set<String> processedExternalRoles = new HashSet<>();
 
-        // Write roles and privileges first
+        // Write roles
         for (String role : roles) {
-            rowNum = writeRoleWithSubRoles(sheet, userId, role, "", "", rowNum, lightGreyStyle, whiteStyle, processedRoles);
+            rowNum = writeRoleWithSubRoles(sheet, userId, role, "", false, rowNum, lightGreyStyle, whiteStyle, processedRoles);
         }
 
-        // Write externalRoles and their privileges after roles
-        for (String externalRole : externalRoles) {
-            rowNum = writeExternalRoleWithSubRoles(sheet, userId, externalRole, "", "", rowNum, lightGreyStyle, whiteStyle, processedExternalRoles);
+        // Write external roles
+        for (String role : externalRoles) {
+            rowNum = writeRoleWithSubRoles(sheet, userId, role, "", true, rowNum, lightGreyStyle, whiteStyle, processedRoles);
         }
     }
 
@@ -313,7 +311,7 @@ public class PermissionService {
             String userId,
             String roleId,
             String parentRole,
-            String parentExternalRole,
+            boolean isExternal,
             int rowNum,
             CellStyle lightGreyStyle,
             CellStyle whiteStyle,
@@ -332,9 +330,8 @@ public class PermissionService {
             Row row = sheet.createRow(rowNum++);
             createCell(row, COLUMN_USER, userId, rowStyle);
             createCell(row, COLUMN_ROLE, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
+            createCell(row, COLUMN_ROLE_TYPE, isExternal ? "external" : "", rowStyle);
             createCell(row, COLUMN_SUBROLE, parentRole.isEmpty() ? "" : roleId, rowStyle);
-            createCell(row, COLUMN_EXTERNAL_ROLE, "", rowStyle);
-            createCell(row, COLUMN_SUB_EXTERNAL_ROLE, "", rowStyle);
             createCell(row, COLUMN_PRIVILEGE, "", rowStyle);
             createCell(row, COLUMN_REPOSITORIES, "", rowStyle);
             createCell(row, COLUMN_ACTION, "", rowStyle);
@@ -348,8 +345,13 @@ public class PermissionService {
                     continue;
                 }
 
-                List<String> actions = privilege.get().getActions();
                 String repository = privilege.get().getRepository();
+
+                List<String> actions = privilege
+                        .map(Privilege::getActions)
+                        .orElse(Collections.emptyList());
+                var actionsWithoutBrackets = actions.toString().substring(1, actions.toString().length() - 1);
+
                 String contentSelectorName = privilege.get().getContentSelector();  // can be null, for example for the built-in privilege "nx-apikey-all"
 
                 String expression = "";
@@ -364,9 +366,8 @@ public class PermissionService {
                     Row row = sheet.createRow(rowNum++);
                     createCell(row, COLUMN_USER, userId, rowStyle);
                     createCell(row, COLUMN_ROLE, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
+                    createCell(row, COLUMN_ROLE_TYPE, isExternal ? "external" : "", rowStyle);
                     createCell(row, COLUMN_SUBROLE, parentRole.isEmpty() ? "" : roleId, rowStyle);
-                    createCell(row, COLUMN_EXTERNAL_ROLE, "", rowStyle);
-                    createCell(row, COLUMN_SUB_EXTERNAL_ROLE, "", rowStyle);
                     createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
                     createCell(row, COLUMN_REPOSITORIES, repository, rowStyle);
                     createCell(row, COLUMN_ACTION, "", rowStyle);
@@ -378,12 +379,11 @@ public class PermissionService {
                         Row row = sheet.createRow(rowNum++);
                         createCell(row, COLUMN_USER, userId, rowStyle);
                         createCell(row, COLUMN_ROLE, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
+                        createCell(row, COLUMN_ROLE_TYPE, "", rowStyle);
                         createCell(row, COLUMN_SUBROLE, parentRole.isEmpty() ? "" : roleId, rowStyle);
-                        createCell(row, COLUMN_EXTERNAL_ROLE, "", rowStyle);
-                        createCell(row, COLUMN_SUB_EXTERNAL_ROLE, "", rowStyle);
                         createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
                         createCell(row, COLUMN_REPOSITORIES, repository, rowStyle);
-                        createCell(row, COLUMN_ACTION, action, rowStyle);
+                        createCell(row, COLUMN_ACTION, actionsWithoutBrackets, rowStyle);
                         createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
                         createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
                     }
@@ -395,87 +395,7 @@ public class PermissionService {
                 .map(Role::getRoles)
                 .orElse(Collections.emptyList());
         for (String subRole : subRoles) {
-            rowNum = writeRoleWithSubRoles(sheet, userId, subRole, roleId, parentExternalRole, rowNum, lightGreyStyle, whiteStyle, processedRoles);
-        }
-
-        return rowNum;
-    }
-
-    private int writeExternalRoleWithSubRoles(
-            Sheet sheet,
-            String userId,
-            String externalRoleId,
-            String parentExternalRole,
-            String parentRole,
-            int rowNum,
-            CellStyle lightGreyStyle,
-            CellStyle whiteStyle,
-            Set<String> processedExternalRoles) {
-
-        if (processedExternalRoles.contains(externalRoleId)) {
-            return rowNum;
-        }
-        processedExternalRoles.add(externalRoleId);
-
-        Optional<Role> role = nexusAccessService.getRole(externalRoleId);
-
-        List<String> privilegeNames = role
-                .map(Role::getPrivileges)
-                .orElse(new ArrayList<>());
-
-        if (privilegeNames.isEmpty()) {
-            CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
-            Row row = sheet.createRow(rowNum++);
-            createCell(row, COLUMN_USER, userId, rowStyle);
-            createCell(row, COLUMN_ROLE, "", rowStyle);
-            createCell(row, COLUMN_SUBROLE, "", rowStyle);
-            createCell(row, COLUMN_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
-            createCell(row, COLUMN_SUB_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
-            createCell(row, COLUMN_PRIVILEGE, "", rowStyle);
-            createCell(row, COLUMN_REPOSITORIES, "", rowStyle);
-            createCell(row, COLUMN_ACTION, "", rowStyle);
-            createCell(row, COLUMN_CONTENT_SELECTOR_NAME, "", rowStyle);
-            createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, "", rowStyle);
-        } else {
-            for (String privilegeName : privilegeNames) {
-                Optional<Privilege> privilege = nexusAccessService.getPrivilege(privilegeName);
-
-                String repository = privilege.get().getRepository();
-
-                List<String> actions = privilege
-                        .map(Privilege::getActions)
-                        .orElse(Collections.emptyList());
-                var actionsWithoutBrackets = actions.toString().substring(1, actions.toString().length() - 1);
-
-                String contentSelectorName = privilege
-                        .map(Privilege::getContentSelector)
-                        .orElse("");
-
-                String expression = contentSelectorName.isEmpty() ? "" : nexusAccessService
-                        .getContentSelector(contentSelectorName)
-                        .map(ContentSelector::getExpression)
-                        .orElse("");
-
-                CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
-                Row row = sheet.createRow(rowNum++);
-                createCell(row, COLUMN_USER, userId, rowStyle);
-                createCell(row, COLUMN_ROLE, "", rowStyle);
-                createCell(row, COLUMN_SUBROLE, "", rowStyle);
-                createCell(row, COLUMN_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
-                createCell(row, COLUMN_SUB_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
-                createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
-                createCell(row, COLUMN_REPOSITORIES, repository, rowStyle);
-                createCell(row, COLUMN_ACTION, actionsWithoutBrackets, rowStyle);
-                createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
-                createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
-            }
-        }
-
-        List<String> subExternalRoles = role
-                .map(Role::getRoles)
-                .orElse(new ArrayList<>());
-        for (String subExternalRole : subExternalRoles) {
-            rowNum = writeExternalRoleWithSubRoles(sheet, userId, subExternalRole, externalRoleId, parentRole, rowNum, lightGreyStyle, whiteStyle, processedExternalRoles);
+            rowNum = writeRoleWithSubRoles(sheet, userId, subRole, roleId, false, rowNum, lightGreyStyle, whiteStyle, processedRoles);
         }
 
         return rowNum;

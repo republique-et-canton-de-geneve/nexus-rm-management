@@ -179,7 +179,7 @@ public class NexusAccessService {
                     .block();
         } catch (WebClientResponseException.NotFound e) {
             if (printWarningIfNotFound) {
-                log.warn("Role not found: " + roleId);
+                log.info("Role not found: " + roleId);
             }
         } catch (RuntimeException e) {
             handleInvocationError(e);
