@@ -56,18 +56,18 @@ import static ch.ge.cti.nexus.nexusrmgui.util.DateUtils.FORMATED_DATE;
 public class PermissionService {
 
     // The columns of the Excel file
-    private static int COLUMN_USER = 0;
-    private static int COLUMN_ROLE = 1;
-    private static int COLUMN_SUBROLE = 2;
-    private static int COLUMN_EXTERNAL_ROLE = 3;
-    private static int COLUMN_SUB_EXTERNAL_ROLE = 4;
-    private static int COLUMN_PRIVILEGE = 5;
-    private static int COLUMN_REPOSITORIES = 6;
-    private static int COLUMN_ACTION = 7;
-    private static int COLUMN_CONTENT_SELECTOR_NAME = 8;
-    private static int COLUMN_CONTENT_SELECTOR_EXPRESSION = 9;
+    private static final int COLUMN_USER = 0;
+    private static final int COLUMN_ROLE = 1;
+    private static final int COLUMN_SUBROLE = 2;
+    private static final int COLUMN_EXTERNAL_ROLE = 3;
+    private static final int COLUMN_SUB_EXTERNAL_ROLE = 4;
+    private static final int COLUMN_PRIVILEGE = 5;
+    private static final int COLUMN_REPOSITORIES = 6;
+    private static final int COLUMN_ACTION = 7;
+    private static final int COLUMN_CONTENT_SELECTOR_NAME = 8;
+    private static final int COLUMN_CONTENT_SELECTOR_EXPRESSION = 9;
 
-    String[] columns = {"User", "Role", "Sub Role", "External Role", "Sub External Role", "Privilege", "Repositories", "Action", "Content Selector", "Expression"};
+    private final String[] columns = {"User", "Role", "Sub Role", "External Role", "Sub External Role", "Privilege", "Repositories", "Actions", "Content Selector", "Expression"};
 
     @Resource
     private NexusAccessService nexusAccessService;
@@ -445,6 +445,8 @@ public class PermissionService {
                 List<String> actions = privilege
                         .map(Privilege::getActions)
                         .orElse(Collections.emptyList());
+                var actionsWithoutBrackets = actions.toString().substring(1, actions.toString().length() - 1);
+
                 String contentSelectorName = privilege
                         .map(Privilege::getContentSelector)
                         .orElse("");
@@ -454,35 +456,18 @@ public class PermissionService {
                         .map(ContentSelector::getExpression)
                         .orElse("");
 
-                if (actions.isEmpty()) {
-                    CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
-                    Row row = sheet.createRow(rowNum++);
-                    createCell(row, COLUMN_USER, userId, rowStyle);
-                    createCell(row, COLUMN_ROLE, "", rowStyle);
-                    createCell(row, COLUMN_SUBROLE, "", rowStyle);
-                    createCell(row, COLUMN_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
-                    createCell(row, COLUMN_SUB_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
-                    createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
-                    createCell(row, COLUMN_REPOSITORIES, repository, rowStyle);
-                    createCell(row, COLUMN_ACTION, "", rowStyle);
-                    createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
-                    createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
-                } else {
-                    for (String action : actions) {
-                        CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
-                        Row row = sheet.createRow(rowNum++);
-                        createCell(row, COLUMN_USER, userId, rowStyle);
-                        createCell(row, COLUMN_ROLE, "", rowStyle);
-                        createCell(row, COLUMN_SUBROLE, "", rowStyle);
-                        createCell(row, COLUMN_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
-                        createCell(row, COLUMN_SUB_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
-                        createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
-                        createCell(row, COLUMN_REPOSITORIES, repository, rowStyle);
-                        createCell(row, COLUMN_ACTION, action, rowStyle);
-                        createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
-                        createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
-                    }
-                }
+                CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
+                Row row = sheet.createRow(rowNum++);
+                createCell(row, COLUMN_USER, userId, rowStyle);
+                createCell(row, COLUMN_ROLE, "", rowStyle);
+                createCell(row, COLUMN_SUBROLE, "", rowStyle);
+                createCell(row, COLUMN_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
+                createCell(row, COLUMN_SUB_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
+                createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
+                createCell(row, COLUMN_REPOSITORIES, repository, rowStyle);
+                createCell(row, COLUMN_ACTION, actionsWithoutBrackets, rowStyle);
+                createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
+                createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
             }
         }
 
