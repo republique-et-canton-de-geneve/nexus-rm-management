@@ -20,7 +20,6 @@ import ch.ge.cti.nexus.nexusrmgui.business.permission.ContentSelector;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Privilege;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Role;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.User;
-import ch.ge.cti.nexus.nexusrmgui.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -63,9 +62,12 @@ public class PermissionService {
     private static int COLUMN_EXTERNAL_ROLE = 3;
     private static int COLUMN_SUB_EXTERNAL_ROLE = 4;
     private static int COLUMN_PRIVILEGE = 5;
-    private static int COLUMN_ACTION = 6;
-    private static int COLUMN_CONTENT_SELECTOR_NAME = 7;
-    private static int COLUMN_CONTENT_SELECTOR_EXPRESSION = 8;
+    private static int COLUMN_REPOSITORIES = 6;
+    private static int COLUMN_ACTION = 7;
+    private static int COLUMN_CONTENT_SELECTOR_NAME = 8;
+    private static int COLUMN_CONTENT_SELECTOR_EXPRESSION = 9;
+
+    String[] columns = {"User", "Role", "Sub Role", "External Role", "Sub External Role", "Privilege", "Repositories", "Action", "Content Selector", "Expression"};
 
     @Resource
     private NexusAccessService nexusAccessService;
@@ -91,13 +93,13 @@ public class PermissionService {
     public void showEmbeddedRoles() {
         getEmbeddedRolesByRole().entrySet().stream()
                 .map(e -> {
-                        var roleName = e.getKey().getName();
-                        var embeddedRoles = e.getValue();
-                        var embeddedRoleNames = embeddedRoles.stream()
-                                       .map(Role::getName)
-                                       .filter(s -> ! s.equals(roleName))
-                                       .toList();
-                        return e.getKey().getName() + ": " + embeddedRoleNames;
+                    var roleName = e.getKey().getName();
+                    var embeddedRoles = e.getValue();
+                    var embeddedRoleNames = embeddedRoles.stream()
+                            .map(Role::getName)
+                            .filter(s -> !s.equals(roleName))
+                            .toList();
+                    return e.getKey().getName() + ": " + embeddedRoleNames;
                 })
                 .sorted()
                 .forEach(s -> log.info("{}", s));
@@ -130,9 +132,10 @@ public class PermissionService {
      * Returns a Map containing all users by role.
      * Accounts for the fact that a role can have subroles (recursively) and external roles (also recursively).
      * Only the roles having at least one user are returned.
+     *
      * @return a Map where:
-     *   A key is a role.
-     *   A value is a list of user names
+     * A key is a role.
+     * A value is a list of user names
      */
     private Map<String, Set<String>> showUsersHavingRole() {
         log.info("Getting users by role");
@@ -152,7 +155,7 @@ public class PermissionService {
                             .flatMap(roleName -> getRoles(roleName).stream())
                             .map(Role::getName)
                             .collect(Collectors.toSet());
-                        log.debug("Direct roles of {}: {}", user.getUserId(), rolesOfUser);
+                    log.debug("Direct roles of {}: {}", user.getUserId(), rolesOfUser);
                     usersToRoles.put(user.getUserId(), rolesOfUser);
 
                     // external roles
@@ -160,7 +163,7 @@ public class PermissionService {
                             .flatMap(roleName -> getRoles(roleName).stream())
                             .map(Role::getName)
                             .collect(Collectors.toSet());
-                        log.debug("External roles of {}: {}", user.getUserId(), externalRolesOfUser);
+                    log.debug("External roles of {}: {}", user.getUserId(), externalRolesOfUser);
 
                     // les deux
                     rolesOfUser.addAll(externalRolesOfUser);
@@ -185,10 +188,11 @@ public class PermissionService {
 
     /**
      * For every role, gets the roles embedded by that role.
+     *
      * @return a Map where:
-     *   A key is a role (it cannot be the name of the role, because there are duplicated role names).
-     *   A value is the list of the roles embedded by that role; this includes: the role itself, the
-     *        roles of the role (recursively) and the external roles of the role (recursively)
+     * A key is a role (it cannot be the name of the role, because there are duplicated role names).
+     * A value is the list of the roles embedded by that role; this includes: the role itself, the
+     * roles of the role (recursively) and the external roles of the role (recursively)
      */
     private Map<Role, List<Role>> getEmbeddedRolesByRole() {
         var allRoles = nexusAccessService.getRoles();
@@ -242,6 +246,7 @@ public class PermissionService {
         // Write the header row
         writeHeaderRow(sheet, titleStyle);
 
+        // Write the datas rows
         int rowNum = 1; // row 0 is the header
         writePermissionRows(sheet, user, rowNum, lightGreyStyle, whiteStyle);
 
@@ -269,16 +274,15 @@ public class PermissionService {
 
     private void writeHeaderRow(Sheet sheet, CellStyle titleStyle) {
         Row headerRow = sheet.createRow(0);
-        String[] titles = {"User", "Role", "Sub Role", "External Role", "Sub External Role", "Privilege", "Action", "Content Selector", "Expression"};
 
-        for (int i = 0; i < titles.length; i++) {
+        for (int i = 0; i < columns.length; i++) {
             Cell cell = headerRow.createCell(i);
-            cell.setCellValue(titles[i].toUpperCase());
+            cell.setCellValue(columns[i].toUpperCase());
             cell.setCellStyle(titleStyle);
         }
     }
 
-    private int writePermissionRows(Sheet sheet, User user, int rowNum, CellStyle lightGreyStyle, CellStyle whiteStyle) {
+    private void writePermissionRows(Sheet sheet, User user, int rowNum, CellStyle lightGreyStyle, CellStyle whiteStyle) {
         String userId = user.getUserId().toUpperCase();
 
         List<String> roles = user.getRoles().stream()
@@ -302,8 +306,6 @@ public class PermissionService {
         for (String externalRole : externalRoles) {
             rowNum = writeExternalRoleWithSubRoles(sheet, userId, externalRole, "", "", rowNum, lightGreyStyle, whiteStyle, processedExternalRoles);
         }
-
-        return rowNum;
     }
 
     private int writeRoleWithSubRoles(
@@ -334,6 +336,7 @@ public class PermissionService {
             createCell(row, COLUMN_EXTERNAL_ROLE, "", rowStyle);
             createCell(row, COLUMN_SUB_EXTERNAL_ROLE, "", rowStyle);
             createCell(row, COLUMN_PRIVILEGE, "", rowStyle);
+            createCell(row, COLUMN_REPOSITORIES, "", rowStyle);
             createCell(row, COLUMN_ACTION, "", rowStyle);
             createCell(row, COLUMN_CONTENT_SELECTOR_NAME, "", rowStyle);
             createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, "", rowStyle);
@@ -346,13 +349,14 @@ public class PermissionService {
                 }
 
                 List<String> actions = privilege.get().getActions();
+                String repository = privilege.get().getRepository();
                 String contentSelectorName = privilege.get().getContentSelector();  // can be null, for example for the built-in privilege "nx-apikey-all"
 
                 String expression = "";
                 if (contentSelectorName != null) {
                     expression = nexusAccessService.getContentSelector(contentSelectorName)
-                        .map(ContentSelector::getExpression)
-                        .orElse("");
+                            .map(ContentSelector::getExpression)
+                            .orElse("");
                 }
 
                 if (actions.isEmpty()) {
@@ -364,6 +368,7 @@ public class PermissionService {
                     createCell(row, COLUMN_EXTERNAL_ROLE, "", rowStyle);
                     createCell(row, COLUMN_SUB_EXTERNAL_ROLE, "", rowStyle);
                     createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
+                    createCell(row, COLUMN_REPOSITORIES, repository, rowStyle);
                     createCell(row, COLUMN_ACTION, "", rowStyle);
                     createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
                     createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
@@ -377,6 +382,7 @@ public class PermissionService {
                         createCell(row, COLUMN_EXTERNAL_ROLE, "", rowStyle);
                         createCell(row, COLUMN_SUB_EXTERNAL_ROLE, "", rowStyle);
                         createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
+                        createCell(row, COLUMN_REPOSITORIES, repository, rowStyle);
                         createCell(row, COLUMN_ACTION, action, rowStyle);
                         createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
                         createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
@@ -426,12 +432,16 @@ public class PermissionService {
             createCell(row, COLUMN_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
             createCell(row, COLUMN_SUB_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
             createCell(row, COLUMN_PRIVILEGE, "", rowStyle);
+            createCell(row, COLUMN_REPOSITORIES, "", rowStyle);
             createCell(row, COLUMN_ACTION, "", rowStyle);
             createCell(row, COLUMN_CONTENT_SELECTOR_NAME, "", rowStyle);
             createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, "", rowStyle);
         } else {
             for (String privilegeName : privilegeNames) {
                 Optional<Privilege> privilege = nexusAccessService.getPrivilege(privilegeName);
+
+                String repository = privilege.get().getRepository();
+
                 List<String> actions = privilege
                         .map(Privilege::getActions)
                         .orElse(Collections.emptyList());
@@ -453,6 +463,7 @@ public class PermissionService {
                     createCell(row, COLUMN_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
                     createCell(row, COLUMN_SUB_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
                     createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
+                    createCell(row, COLUMN_REPOSITORIES, repository, rowStyle);
                     createCell(row, COLUMN_ACTION, "", rowStyle);
                     createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
                     createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
@@ -466,6 +477,7 @@ public class PermissionService {
                         createCell(row, COLUMN_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
                         createCell(row, COLUMN_SUB_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
                         createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
+                        createCell(row, COLUMN_REPOSITORIES, repository, rowStyle);
                         createCell(row, COLUMN_ACTION, action, rowStyle);
                         createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
                         createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
@@ -493,7 +505,7 @@ public class PermissionService {
     }
 
     private void autoSizeColumns(Sheet sheet) {
-        for (int i = 0; i < 9; i++) { // Update to 9 columns
+        for (int i = 0; i < columns.length; i++) {
             sheet.autoSizeColumn(i);
         }
     }
