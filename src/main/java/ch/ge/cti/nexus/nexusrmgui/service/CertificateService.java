@@ -34,6 +34,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static ch.ge.cti.nexus.nexusrmgui.util.DateUtils.FORMATED_DATE;
+
 @Service
 @Slf4j
 public class CertificateService {
@@ -158,16 +160,14 @@ public class CertificateService {
             sheet.autoSizeColumn(i);
         }
     }
-    DateUtils utils = new DateUtils();
+
     private void saveWorkbook(Workbook workbook) {
         try {
             File outputDir = new File("output");
             if (!outputDir.exists()) {
                 outputDir.mkdir();
             }
-            var fileName = "expired_certificates_"
-                    +utils.FORMATED_DATE
-                    + ".xlsx";
+            var fileName = "expired_certificates_" + FORMATED_DATE + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);
             fileOut.close();

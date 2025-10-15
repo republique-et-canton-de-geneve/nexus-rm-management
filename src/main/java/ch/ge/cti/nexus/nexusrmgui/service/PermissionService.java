@@ -50,9 +50,22 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ch.ge.cti.nexus.nexusrmgui.util.DateUtils.FORMATED_DATE;
+
 @Service
 @Slf4j
 public class PermissionService {
+
+    // The columns of the Excel file
+    private static int COLUMN_USER = 0;
+    private static int COLUMN_ROLE = 1;
+    private static int COLUMN_SUBROLE = 2;
+    private static int COLUMN_EXTERNAL_ROLE = 3;
+    private static int COLUMN_SUB_EXTERNAL_ROLE = 4;
+    private static int COLUMN_PRIVILEGE = 5;
+    private static int COLUMN_ACTION = 6;
+    private static int COLUMN_CONTENT_SELECTOR_NAME = 7;
+    private static int COLUMN_CONTENT_SELECTOR_EXPRESSION = 8;
 
     @Resource
     private NexusAccessService nexusAccessService;
@@ -256,7 +269,7 @@ public class PermissionService {
 
     private void writeHeaderRow(Sheet sheet, CellStyle titleStyle) {
         Row headerRow = sheet.createRow(0);
-        String[] titles = {"User", "Role", "SubRole", "ExternalRole", "SubExternalRole", "Privilege", "Action", "ContentSelector", "Expression"};
+        String[] titles = {"User", "Role", "Sub Role", "External Role", "Sub External Role", "Privilege", "Action", "Content Selector", "Expression"};
 
         for (int i = 0; i < titles.length; i++) {
             Cell cell = headerRow.createCell(i);
@@ -315,15 +328,15 @@ public class PermissionService {
         if (privilegeNames.isEmpty()) {
             CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
             Row row = sheet.createRow(rowNum++);
-            createCell(row, 0, userId, rowStyle);
-            createCell(row, 1, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
-            createCell(row, 2, parentRole.isEmpty() ? "" : roleId, rowStyle);
-            createCell(row, 3, "", rowStyle);
-            createCell(row, 4, "", rowStyle);
-            createCell(row, 5, "", rowStyle);
-            createCell(row, 6, "", rowStyle);
-            createCell(row, 7, "", rowStyle);
-            createCell(row, 8, "", rowStyle);
+            createCell(row, COLUMN_USER, userId, rowStyle);
+            createCell(row, COLUMN_ROLE, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
+            createCell(row, COLUMN_SUBROLE, parentRole.isEmpty() ? "" : roleId, rowStyle);
+            createCell(row, COLUMN_EXTERNAL_ROLE, "", rowStyle);
+            createCell(row, COLUMN_SUB_EXTERNAL_ROLE, "", rowStyle);
+            createCell(row, COLUMN_PRIVILEGE, "", rowStyle);
+            createCell(row, COLUMN_ACTION, "", rowStyle);
+            createCell(row, COLUMN_CONTENT_SELECTOR_NAME, "", rowStyle);
+            createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, "", rowStyle);
         } else {
             for (String privilegeName : privilegeNames) {
                 Optional<Privilege> privilege = nexusAccessService.getPrivilege(privilegeName);
@@ -345,28 +358,28 @@ public class PermissionService {
                 if (actions.isEmpty()) {
                     CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
                     Row row = sheet.createRow(rowNum++);
-                    createCell(row, 0, userId, rowStyle);
-                    createCell(row, 1, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
-                    createCell(row, 2, parentRole.isEmpty() ? "" : roleId, rowStyle);
-                    createCell(row, 3, "", rowStyle);
-                    createCell(row, 4, "", rowStyle);
-                    createCell(row, 5, privilegeName, rowStyle);
-                    createCell(row, 6, "", rowStyle);
-                    createCell(row, 7, contentSelectorName, rowStyle);
-                    createCell(row, 8, expression, rowStyle);
+                    createCell(row, COLUMN_USER, userId, rowStyle);
+                    createCell(row, COLUMN_ROLE, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
+                    createCell(row, COLUMN_SUBROLE, parentRole.isEmpty() ? "" : roleId, rowStyle);
+                    createCell(row, COLUMN_EXTERNAL_ROLE, "", rowStyle);
+                    createCell(row, COLUMN_SUB_EXTERNAL_ROLE, "", rowStyle);
+                    createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
+                    createCell(row, COLUMN_ACTION, "", rowStyle);
+                    createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
+                    createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
                 } else {
                     for (String action : actions) {
                         CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
                         Row row = sheet.createRow(rowNum++);
-                        createCell(row, 0, userId, rowStyle);
-                        createCell(row, 1, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
-                        createCell(row, 2, parentRole.isEmpty() ? "" : roleId, rowStyle);
-                        createCell(row, 3, "", rowStyle);
-                        createCell(row, 4, "", rowStyle);
-                        createCell(row, 5, privilegeName, rowStyle);
-                        createCell(row, 6, action, rowStyle);
-                        createCell(row, 7, contentSelectorName, rowStyle);
-                        createCell(row, 8, expression, rowStyle);
+                        createCell(row, COLUMN_USER, userId, rowStyle);
+                        createCell(row, COLUMN_ROLE, parentRole.isEmpty() ? roleId : parentRole, rowStyle);
+                        createCell(row, COLUMN_SUBROLE, parentRole.isEmpty() ? "" : roleId, rowStyle);
+                        createCell(row, COLUMN_EXTERNAL_ROLE, "", rowStyle);
+                        createCell(row, COLUMN_SUB_EXTERNAL_ROLE, "", rowStyle);
+                        createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
+                        createCell(row, COLUMN_ACTION, action, rowStyle);
+                        createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
+                        createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
                     }
                 }
             }
@@ -407,15 +420,15 @@ public class PermissionService {
         if (privilegeNames.isEmpty()) {
             CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
             Row row = sheet.createRow(rowNum++);
-            createCell(row, 0, userId, rowStyle);
-            createCell(row, 1, "", rowStyle);
-            createCell(row, 2, "", rowStyle);
-            createCell(row, 3, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
-            createCell(row, 4, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
-            createCell(row, 5, "", rowStyle);
-            createCell(row, 6, "", rowStyle);
-            createCell(row, 7, "", rowStyle);
-            createCell(row, 8, "", rowStyle);
+            createCell(row, COLUMN_USER, userId, rowStyle);
+            createCell(row, COLUMN_ROLE, "", rowStyle);
+            createCell(row, COLUMN_SUBROLE, "", rowStyle);
+            createCell(row, COLUMN_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
+            createCell(row, COLUMN_SUB_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
+            createCell(row, COLUMN_PRIVILEGE, "", rowStyle);
+            createCell(row, COLUMN_ACTION, "", rowStyle);
+            createCell(row, COLUMN_CONTENT_SELECTOR_NAME, "", rowStyle);
+            createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, "", rowStyle);
         } else {
             for (String privilegeName : privilegeNames) {
                 Optional<Privilege> privilege = nexusAccessService.getPrivilege(privilegeName);
@@ -434,28 +447,28 @@ public class PermissionService {
                 if (actions.isEmpty()) {
                     CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
                     Row row = sheet.createRow(rowNum++);
-                    createCell(row, 0, userId, rowStyle);
-                    createCell(row, 1, "", rowStyle);
-                    createCell(row, 2, "", rowStyle);
-                    createCell(row, 3, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
-                    createCell(row, 4, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
-                    createCell(row, 5, privilegeName, rowStyle);
-                    createCell(row, 6, "", rowStyle);
-                    createCell(row, 7, contentSelectorName, rowStyle);
-                    createCell(row, 8, expression, rowStyle);
+                    createCell(row, COLUMN_USER, userId, rowStyle);
+                    createCell(row, COLUMN_ROLE, "", rowStyle);
+                    createCell(row, COLUMN_SUBROLE, "", rowStyle);
+                    createCell(row, COLUMN_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
+                    createCell(row, COLUMN_SUB_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
+                    createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
+                    createCell(row, COLUMN_ACTION, "", rowStyle);
+                    createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
+                    createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
                 } else {
                     for (String action : actions) {
                         CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
                         Row row = sheet.createRow(rowNum++);
-                        createCell(row, 0, userId, rowStyle);
-                        createCell(row, 1, "", rowStyle);
-                        createCell(row, 2, "", rowStyle);
-                        createCell(row, 3, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
-                        createCell(row, 4, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
-                        createCell(row, 5, privilegeName, rowStyle);
-                        createCell(row, 6, action, rowStyle);
-                        createCell(row, 7, contentSelectorName, rowStyle);
-                        createCell(row, 8, expression, rowStyle);
+                        createCell(row, COLUMN_USER, userId, rowStyle);
+                        createCell(row, COLUMN_ROLE, "", rowStyle);
+                        createCell(row, COLUMN_SUBROLE, "", rowStyle);
+                        createCell(row, COLUMN_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? externalRoleId : parentExternalRole, rowStyle);
+                        createCell(row, COLUMN_SUB_EXTERNAL_ROLE, parentExternalRole.isEmpty() ? "" : externalRoleId, rowStyle);
+                        createCell(row, COLUMN_PRIVILEGE, privilegeName, rowStyle);
+                        createCell(row, COLUMN_ACTION, action, rowStyle);
+                        createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
+                        createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
                     }
                 }
             }
@@ -484,19 +497,19 @@ public class PermissionService {
             sheet.autoSizeColumn(i);
         }
     }
-    DateUtils utils = new DateUtils();
+
     private void saveWorkbook(Workbook workbook, User user) {
         try {
             File outputDir = new File("output");
             if (!outputDir.exists()) {
                 outputDir.mkdir();
             }
-            String fileName = "permissions_" + user.getUserId() + "_" + utils.FORMATED_DATE + ".xlsx";
+            String fileName = "permissions_" + user.getUserId() + "_" + FORMATED_DATE + ".xlsx";
             FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
             workbook.write(fileOut);
             fileOut.close();
             workbook.close();
-            log.info("Excel file has been generated successfully.");
+            log.info("Excel file has been generated successfully");
         } catch (IOException e) {
             log.error("Error writing Excel file", e);
         }

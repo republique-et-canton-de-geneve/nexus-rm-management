@@ -1,13 +1,13 @@
 package ch.ge.cti.nexus.nexusrmgui.util;
 
-import org.apache.xmlbeans.GDate;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DateUtils {
 
-    public final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss");
+    private DateUtils() {
+    }
 
-    public final String FORMATED_DATE = DATE_FORMAT.format(new Date());
+    public static final String FORMATED_DATE = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+
 }
