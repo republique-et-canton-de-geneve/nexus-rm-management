@@ -29,6 +29,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -66,7 +67,7 @@ public class PermissionService {
     private static final int COLUMN_CONTENT_SELECTOR_NAME = 7;
     private static final int COLUMN_CONTENT_SELECTOR_EXPRESSION = 8;
 
-    private final String[] columns = {"User", "Role", "Role Type", "Sub Role", "Privilege", "Repositories", "Actions", "Content Selector", "Expression"};
+    private static final String[] COLUMNS = {"User", "Role", "Role Type", "Sub Role", "Privilege", "Repositories", "Actions", "Content Selector", "Expression"};
 
     @Resource
     private NexusAccessService nexusAccessService;
@@ -252,6 +253,10 @@ public class PermissionService {
         // Auto-size columns
         autoSizeColumns(sheet);
 
+        // Add a filter to every column
+        sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, COLUMNS.length - 1));
+
+        // Save the file
         saveWorkbook(workbook, user);
     }
 
@@ -274,9 +279,9 @@ public class PermissionService {
     private void writeHeaderRow(Sheet sheet, CellStyle titleStyle) {
         Row headerRow = sheet.createRow(0);
 
-        for (int i = 0; i < columns.length; i++) {
+        for (int i = 0; i < COLUMNS.length; i++) {
             Cell cell = headerRow.createCell(i);
-            cell.setCellValue(columns[i].toUpperCase());
+            cell.setCellValue(COLUMNS[i].toUpperCase());
             cell.setCellStyle(titleStyle);
         }
     }
@@ -410,7 +415,7 @@ public class PermissionService {
     }
 
     private void autoSizeColumns(Sheet sheet) {
-        for (int i = 0; i < columns.length; i++) {
+        for (int i = 0; i < COLUMNS.length; i++) {
             sheet.autoSizeColumn(i);
         }
     }
