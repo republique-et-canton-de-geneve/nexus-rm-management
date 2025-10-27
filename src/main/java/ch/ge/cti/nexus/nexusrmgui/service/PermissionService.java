@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static ch.ge.cti.nexus.nexusrmgui.util.DateUtils.FORMATED_DATE;
 
@@ -279,11 +280,12 @@ public class PermissionService {
     private void writeHeaderRow(Sheet sheet, CellStyle titleStyle) {
         Row headerRow = sheet.createRow(0);
 
-        for (int i = 0; i < COLUMNS.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(COLUMNS[i].toUpperCase());
-            cell.setCellStyle(titleStyle);
-        }
+        IntStream.range(0, COLUMNS.length)
+                .forEach(i -> {
+                    Cell cell = headerRow.createCell(i);
+                    cell.setCellValue(COLUMNS[i].toUpperCase());
+                    cell.setCellStyle(titleStyle);
+                });
     }
 
     private void writePermissionRows(Sheet sheet, User user, int rowNum, CellStyle lightGreyStyle, CellStyle whiteStyle) {
@@ -415,9 +417,8 @@ public class PermissionService {
     }
 
     private void autoSizeColumns(Sheet sheet) {
-        for (int i = 0; i < COLUMNS.length; i++) {
-            sheet.autoSizeColumn(i);
-        }
+        IntStream.range(0, COLUMNS.length)
+                .forEach(sheet::autoSizeColumn);
     }
 
     private void saveWorkbook(Workbook workbook, User user) {
