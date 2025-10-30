@@ -15,23 +15,31 @@
 
 package ch.ge.cti.nexus.nexusrmgui.service;
 
+import ch.ge.cti.nexus.nexusrmgui.business.NexusAccessService;
 import ch.ge.cti.nexus.nexusrmgui.business.component.Asset;
 import ch.ge.cti.nexus.nexusrmgui.business.component.Component;
 import ch.ge.cti.nexus.nexusrmgui.business.component.ComponentResponse;
-import ch.ge.cti.nexus.nexusrmgui.business.NexusAccessService;
+import ch.ge.cti.nexus.nexusrmgui.util.OutputFileUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ch.ge.cti.nexus.nexusrmgui.util.OutputFileUtils.saveWorkbook;
 
 @Service
 @Slf4j
@@ -62,7 +70,6 @@ public class ComponentService {
                         .map(Asset::getLastModified)
                         .max(Comparator.naturalOrder())
                         .orElse(null)));
-
 
         List<Component> componentsToDelete = components.stream()
                 .skip(latestComponent)
@@ -167,9 +174,10 @@ public class ComponentService {
                 firstRow = false;
             }
         }
-        saveWorkbook(workbook, "output", "components");
-    }
 
+        // Create the output file
+        saveWorkbook(workbook, "components");
+    }
 
     private void setColumnWidths(Sheet sheet) {
         sheet.setColumnWidth(0, 28 * 256); // GROUP column
@@ -214,21 +222,4 @@ public class ComponentService {
         cell.setCellStyle(style);
     }
 
-    private void saveWorkbook(Workbook workbook, String outputDirName, String baseFileName) {
-        try {
-            File outputDir = new File(outputDirName);
-            if (!outputDir.exists()) {
-                outputDir.mkdir();
-            }
-            long timestamp = System.currentTimeMillis() / 1000L;
-            String fileName = baseFileName + "_" + timestamp + ".xlsx";
-            FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
-            workbook.write(fileOut);
-            fileOut.close();
-            workbook.close();
-            log.info("Excel file has been generated successfully.");
-        } catch (IOException e) {
-            log.error("Error writing Excel file", e);
-        }
-    }
 }

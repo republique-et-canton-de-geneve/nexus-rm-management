@@ -20,6 +20,7 @@ import ch.ge.cti.nexus.nexusrmgui.business.permission.ContentSelector;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Privilege;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Role;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.User;
+import ch.ge.cti.nexus.nexusrmgui.util.OutputFileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -35,9 +36,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,7 +49,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static ch.ge.cti.nexus.nexusrmgui.util.DateUtils.FORMATED_DATE;
+import static ch.ge.cti.nexus.nexusrmgui.util.OutputFileUtils.saveWorkbook;
 
 @Service
 @Slf4j
@@ -257,8 +255,8 @@ public class PermissionService {
         // Add a filter to every column
         sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, COLUMNS.length - 1));
 
-        // Save the file
-        saveWorkbook(workbook, user);
+        // Create the output file
+        saveWorkbook(workbook, "permissions_" + user.getUserId() );
     }
 
     private CellStyle createCellStyle(Workbook workbook, IndexedColors color) {
@@ -419,23 +417,6 @@ public class PermissionService {
     private void autoSizeColumns(Sheet sheet) {
         IntStream.range(0, COLUMNS.length)
                 .forEach(sheet::autoSizeColumn);
-    }
-
-    private void saveWorkbook(Workbook workbook, User user) {
-        try {
-            File outputDir = new File("output");
-            if (!outputDir.exists()) {
-                outputDir.mkdir();
-            }
-            String fileName = "permissions_" + user.getUserId() + "_" + FORMATED_DATE + ".xlsx";
-            FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
-            workbook.write(fileOut);
-            fileOut.close();
-            workbook.close();
-            log.info("Excel file has been generated successfully");
-        } catch (IOException e) {
-            log.error("Error writing Excel file", e);
-        }
     }
 
 }

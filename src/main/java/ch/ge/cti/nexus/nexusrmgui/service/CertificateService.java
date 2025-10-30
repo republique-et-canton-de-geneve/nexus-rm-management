@@ -15,26 +15,29 @@
 
 package ch.ge.cti.nexus.nexusrmgui.service;
 
-import ch.ge.cti.nexus.nexusrmgui.business.certificate.Certificate;
 import ch.ge.cti.nexus.nexusrmgui.business.NexusAccessService;
+import ch.ge.cti.nexus.nexusrmgui.business.certificate.Certificate;
 import ch.ge.cti.nexus.nexusrmgui.exception.ApplicationException;
-import ch.ge.cti.nexus.nexusrmgui.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static ch.ge.cti.nexus.nexusrmgui.util.DateUtils.FORMATED_DATE;
+import static ch.ge.cti.nexus.nexusrmgui.util.OutputFileUtils.saveWorkbook;
 
 @Service
 @Slf4j
@@ -90,7 +93,8 @@ public class CertificateService {
         // Auto-size columns
         autoSizeColumns(sheet);
 
-        saveWorkbook(workbook);
+        // Create the output file
+        saveWorkbook(workbook, "expired_certificates");
     }
 
     private CellStyle createCellStyle(Workbook workbook, IndexedColors color) {
@@ -158,23 +162,6 @@ public class CertificateService {
     private void autoSizeColumns(Sheet sheet) {
         for (int i = 0; i < 11; i++) { // Assuming there are 11 columns
             sheet.autoSizeColumn(i);
-        }
-    }
-
-    private void saveWorkbook(Workbook workbook) {
-        try {
-            File outputDir = new File("output");
-            if (!outputDir.exists()) {
-                outputDir.mkdir();
-            }
-            var fileName = "expired_certificates_" + FORMATED_DATE + ".xlsx";
-            FileOutputStream fileOut = new FileOutputStream(new File(outputDir, fileName));
-            workbook.write(fileOut);
-            fileOut.close();
-            workbook.close();
-            log.info("File [{}] successfully generated in directory [{}]", fileName, outputDir);
-        } catch (IOException e) {
-            log.error("Error writing Excel file", e);
         }
     }
 
