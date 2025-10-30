@@ -32,7 +32,7 @@ public class OutputFileUtils {
             workbook.write(fileOut);
             fileOut.close();
             workbook.close();
-            log.info("Excel file {}/{} been generated successfully", OUTPUT_DIRECTORY, fileName);
+            log.info("Excel file {}/{} has been generated successfully", OUTPUT_DIRECTORY, fileName);
         } catch (IOException e) {
             log.error("Error writing Excel file", e);
         }

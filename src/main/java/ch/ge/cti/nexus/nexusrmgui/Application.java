@@ -42,7 +42,6 @@ public class Application implements CommandLineRunner {
     int days;
 
     public static void main(String[] args) {
-
         SpringApplication.run(Application.class, args);
     }
 
@@ -50,11 +49,20 @@ public class Application implements CommandLineRunner {
     public void run(String... args) throws InterruptedException {
         final int DAYS_IN_MONTH = 30;
 
+        final var MESSAGE = "Use either '1' for expired certificates"
+                + " or '2' for heavy components"
+                + " or '3' for permissions"
+                + " or '4' for deleting components"
+                + " or '5' for embedded roles"
+                + " or '6' for users by role"
+                + ". See the README file.";
+
         if (args.length > 0) {
             String option = args[0];
 
             switch (option) {
-                case "certificates", "1":
+                case "1":
+                    // expired certificates
                     if (args.length > 1) {
                         days = Integer.parseInt(args[1]);
                     } else {
@@ -62,18 +70,21 @@ public class Application implements CommandLineRunner {
                     }
                     certificateService.showExpiredCertificates(days);
                     break;
-                case "heavyComponents", "2":
+                case "2":
+                    // heavy components
                     componentService.showComponents();
                     break;
-                case "permissions", "3":
+                case "3":
+                    // permissions
                     if (args.length > 1) {
                         var userId = args[1].toUpperCase(ENGLISH);
                         permissionService.showUserPermissions(userId);
                     } else {
-                        System.out.println("Please provide a user ID for the 'permission' option.");
+                        log.error("Option '1' requires a user ID as a second argument");
                     }
                     break;
-                case "deleteComponents", "4":
+                case "4":
+                    // delete components
                     var dryRun = true;
                     // By default, dryRun is true. It is set to false only if the second argument is "realRun".
                     if (args.length > 1 && args[1].equalsIgnoreCase("realRun")) {
@@ -82,21 +93,24 @@ public class Application implements CommandLineRunner {
                     componentService.deleteComponents(dryRun);
                     break;
                 case "5":
+                    // embedded roles
                     permissionService.showEmbeddedRoles();
                     break;
                 case "6":
+                    // user having a specified role
                     var roleName = args[1];
                     permissionService.showUsersHavingRole(roleName);
                     break;
                 case "7":
+                    // roles having a specified privilege
                     var privilegeName = args[1];
                     permissionService.showRolesHavingPrivilege(privilegeName);
                     break;
                 default:
-                    System.out.println("Invalid option. Use 'certificate' or '1' for certificates, 'heavyComponents' or '2' for heavyComponents, 'permissions' or '3' for permissions, 'deleteComponents' or '4' for deleteComponents, '5' for embedded roles, '6' for users by role.");
+                    log.error("Invalid option. " + MESSAGE);
             }
         } else {
-            System.out.println("No arguments provided. Use 'certificate' or '1' for certificates, 'heavyComponents' or '2' for heavyComponents, 'permissions' or '3' for permissions, 'deleteComponents' or '4' for deleteComponents. See the README file.");
+            log.error("No arguments provided. " + MESSAGE);
         }
     }
 
