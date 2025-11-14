@@ -97,7 +97,7 @@ public class Application implements CommandLineRunner {
                     permissionService.showEmbeddedRoles();
                     break;
                 case "6":
-                    // user having a specified role
+                    // users having a specified role
                     var roleName = args[1];
                     permissionService.showUsersHavingRole(roleName);
                     break;
@@ -105,6 +105,10 @@ public class Application implements CommandLineRunner {
                     // roles having a specified privilege
                     var privilegeName = args[1];
                     permissionService.showRolesHavingPrivilege(privilegeName);
+                    break;
+                case "8":
+                    // unused privileges
+                    permissionService.showUnusedPrivileges();
                     break;
                 default:
                     log.error("Invalid option. " + MESSAGE);

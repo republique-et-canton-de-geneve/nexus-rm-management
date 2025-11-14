@@ -20,7 +20,6 @@ import ch.ge.cti.nexus.nexusrmgui.business.permission.ContentSelector;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Privilege;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Role;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.User;
-import ch.ge.cti.nexus.nexusrmgui.util.OutputFileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -125,6 +124,18 @@ public class PermissionService {
                 .toList();
 
         log.info("Roles having privilege [{}]: {}", searchPrivilegeName, roles);
+    }
+
+    public void showUnusedPrivileges() {
+        var roles = nexusAccessService.getRoles();
+        nexusAccessService.getPrivileges()
+                .forEach(p -> {
+                    var privilegeIsUsed = roles.stream()
+                            .anyMatch(role -> role.getPrivileges().contains(p.getName()));
+                    if (!privilegeIsUsed) {
+                        log.info("Privilege [{}] is not used", p.getName());
+                    }
+                });
     }
 
     /**
@@ -256,7 +267,7 @@ public class PermissionService {
         sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, COLUMNS.length - 1));
 
         // Create the output file
-        saveWorkbook(workbook, "permissions_" + user.getUserId() );
+        saveWorkbook(workbook, "permissions_" + user.getUserId());
     }
 
     private CellStyle createCellStyle(Workbook workbook, IndexedColors color) {
