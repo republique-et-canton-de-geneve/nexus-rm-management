@@ -86,7 +86,7 @@ Then run
 ```
 mvn spring-boot:run -Dspring-boot.run.arguments=<ARGS>
 ```
-where `<ARGS>` is, for instance, `certificate`.
+where `<ARGS>` is, for instance, `1` (for listing the expired certificates).
 
 ### JAR
 
@@ -100,7 +100,7 @@ Then run
 ```
 $JAVA_HOME/bin/java -jar target/nexus-rm-management-<VERSION>.jar <ARGS>
 ```
-where `<ARGS>` is, for instance, `certificate`.
+where `<ARGS>` is, for instance, `1`.
 
 ### IntelliJ
 
