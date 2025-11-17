@@ -156,9 +156,7 @@
                     <generateModelDocumentation>false</generateModelDocumentation>
                     <generateModelTests>false</generateModelTests>
                     <generatorName>java</generatorName>
-                    <withXml>false</withXml>
                     <configOptions>
-                        <additionalModelTypeAnnotations>@lombok.Builder @lombok.AllArgsConstructor</additionalModelTypeAnnotations>
                         <modelPackage>ch.ge.cti.nexus.nexusrmgui.openapi.marshalling</modelPackage>
                         <performBeanValidation>false</performBeanValidation>
                         <serializationLibrary>jackson</serializationLibrary>
