@@ -55,7 +55,7 @@ public class NexusAccessService {
     @Resource
     private WebClientProvider webClientProvider;
 
-    public Certificate[] getCertificats() {
+    public Certificate[] getCertificates() {
         try {
             var uri = "/v1/security/ssl/truststore";
             return webClientProvider.getWebClient()

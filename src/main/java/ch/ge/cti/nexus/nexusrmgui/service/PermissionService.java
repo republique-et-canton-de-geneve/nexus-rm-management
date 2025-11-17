@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -128,14 +129,17 @@ public class PermissionService {
 
     public void showUnusedPrivileges() {
         var roles = nexusAccessService.getRoles();
-        nexusAccessService.getPrivileges()
-                .forEach(p -> {
-                    var privilegeIsUsed = roles.stream()
-                            .anyMatch(role -> role.getPrivileges().contains(p.getName()));
-                    if (!privilegeIsUsed) {
-                        log.info("Privilege [{}] is not used", p.getName());
-                    }
-                });
+        long count = nexusAccessService.getPrivileges().stream()
+                .filter(p -> Objects.equals(p.getType(), "repository-content-selector"))
+                .filter(p -> roles.stream()
+                        .noneMatch(role -> role.getPrivileges().contains(p.getName())))   // = unused privilege
+                .peek(p -> {
+                        ContentSelector cs = nexusAccessService.getContentSelector(p.getContentSelector()).get();
+                        log.info("Privilege [name={}, contentSelector=[name={}, expression=[{}]]] is not used",
+                                p.getName(), cs.getName(), cs.getExpression());
+                })
+                .count();
+        log.info("Total: {} privileges", count);
     }
 
     /**

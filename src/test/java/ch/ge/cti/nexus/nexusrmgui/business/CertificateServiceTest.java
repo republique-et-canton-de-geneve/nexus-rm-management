@@ -84,7 +84,7 @@ class CertificateServiceTest {
     @Test
     void testShowExpiredCertificates() {
         // Given
-        given(nexusAccessService.getCertificats()).willReturn(expiredCertificates.toArray(new Certificate[0]));
+        given(nexusAccessService.getCertificates()).willReturn(expiredCertificates.toArray(new Certificate[0]));
 
         // When
         certificateService.showExpiredCertificates(30);
@@ -142,7 +142,7 @@ class CertificateServiceTest {
                         .build()
         };
 
-        given(nexusAccessService.getCertificats()).willReturn(mockCertificates);
+        given(nexusAccessService.getCertificates()).willReturn(mockCertificates);
 
         // When
         List<Certificate> expiredCertificates = certificateService.getExpiredCertificates(30);

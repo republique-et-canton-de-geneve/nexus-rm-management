@@ -50,7 +50,7 @@ public class CertificateService {
 
     public List<Certificate> getExpiredCertificates(int days) {
         try {
-            Certificate[] certificates = nexusAccessService.getCertificats();
+            Certificate[] certificates = nexusAccessService.getCertificates();
 
             // Filter and sort certificates
             return Arrays.stream(certificates)
