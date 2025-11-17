@@ -109,6 +109,18 @@ public class NexusAccessService {
         }
     }
 
+    /**
+     * *** WARNING ***
+     * For some not understandable reason, the Nexus REST API does not return all users. As
+     * quoted from https://github.com/sonatype/nexus-public/issues/269:
+     * (start of quote)
+     *    For reviewing we want to retrieve a list of all users with source="LDAP":
+     *    https://our-nexus/service/rest/v1/security/users?source=LDAP
+     *    But the list is restricted to 100 users - as marked in the REST API documentation:
+     *    "Retrieve a list of users. Note if the source is not default' the response is limited to 100 users."
+     *    Using 'default' only returns the list of internal users, but not from LDAP.
+     * (end of quote)
+     */
     public List<User> getUsers() {
         try {
             var uri = "/v1/security/users";

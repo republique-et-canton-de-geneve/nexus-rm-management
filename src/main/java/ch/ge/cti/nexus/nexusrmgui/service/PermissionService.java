@@ -106,7 +106,7 @@ public class PermissionService {
 
     public void showUsersHavingRole(String searchRoleName) {
         Set<String> usersWithRole = new HashSet<>();
-        Map<String, Set<String>> usersByRole = showUsersHavingRole();
+        Map<String, Set<String>> usersByRole = getUsersByRole();
         usersByRole.forEach((roleName, roleUsers) -> {
             if (roleName.startsWith(searchRoleName)) {
                 usersWithRole.addAll(roleUsers);
@@ -125,6 +125,18 @@ public class PermissionService {
                 .toList();
 
         log.info("Roles having privilege [{}]: {}", searchPrivilegeName, roles);
+    }
+
+    public void showUnusedRoles() {
+        Map<String, Set<String>> usersByRole = getUsersByRole();
+        usersByRole.forEach((role, users) -> {
+            if (users.isEmpty()) {
+                log.info("Role [{}] is not used", role);
+            }
+        });
+
+        log.warn("The above result is most probably incomplete, as the Nexus RM Rest API is not able to"
+                + " return the complete set of users");
     }
 
     public void showUnusedPrivileges() {
@@ -151,15 +163,15 @@ public class PermissionService {
      * A key is a role.
      * A value is a list of user names
      */
-    private Map<String, Set<String>> showUsersHavingRole() {
+    private Map<String, Set<String>> getUsersByRole() {
         log.info("Getting users by role");
         var usersToRoles = new HashMap<String, Set<String>>();
 
         var users = nexusAccessService.getUsers();
-        log.info("Total number of found users = {}. Not all users are found, see the README", users.size());
+        log.info("Total number of found users = {}. WARNING: not all users are found, see the README", users.size());
         users.sort(Comparator.comparing(User::getUserId));
 
-        nexusAccessService.getUsers()    // ATTENTION : NE TROUVE PAS TOUS LES USERS
+        nexusAccessService.getUsers()    // Beware: the list of users is incomplete!
                 .stream()
                 .sorted(Comparator.comparing(User::getUserId))
                 .peek(user -> log.info("   Processing user {}", user.getUserId()))

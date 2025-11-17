@@ -49,15 +49,10 @@ public class Application implements CommandLineRunner {
     public void run(String... args) throws InterruptedException {
         final int DAYS_IN_MONTH = 30;
 
-        final var MESSAGE = "Use either '1' for expired certificates"
-                + " or '2' for heavy components"
-                + " or '3' for permissions"
-                + " or '4' for deleting components"
-                + " or '5' for embedded roles"
-                + " or '6' for users by role"
-                + ". See the README file.";
+        final var MESSAGE = "Wrong input arguments. Please see the README file.";
 
         if (args.length > 0) {
+            log.info("Program arguments: {}", args);
             String option = args[0];
 
             switch (option) {
@@ -107,6 +102,10 @@ public class Application implements CommandLineRunner {
                     permissionService.showRolesHavingPrivilege(privilegeName);
                     break;
                 case "8":
+                    // unused roles
+                    permissionService.showUnusedRoles();
+                    break;
+                case "9":
                     // unused privileges
                     permissionService.showUnusedPrivileges();
                     break;
