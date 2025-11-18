@@ -24,6 +24,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.Arrays;
+
 import static java.util.Locale.ENGLISH;
 
 @SpringBootApplication
@@ -48,11 +50,10 @@ public class Application implements CommandLineRunner {
     @Override
     public void run(String... args) throws InterruptedException {
         final int DAYS_IN_MONTH = 30;
-
         final var MESSAGE = "Wrong input arguments. Please see the README file.";
 
         if (args.length > 0) {
-            log.info("Program arguments: {}", args);
+            log.info("Input arguments: {}", Arrays.toString(args));
             String option = args[0];
 
             switch (option) {
@@ -80,11 +81,8 @@ public class Application implements CommandLineRunner {
                     break;
                 case "4":
                     // delete components
-                    var dryRun = true;
+                    var dryRun = args.length <= 1 || !args[1].equalsIgnoreCase("realRun");
                     // By default, dryRun is true. It is set to false only if the second argument is "realRun".
-                    if (args.length > 1 && args[1].equalsIgnoreCase("realRun")) {
-                        dryRun = false;
-                    }
                     componentService.deleteComponents(dryRun);
                     break;
                 case "5":
@@ -108,6 +106,10 @@ public class Application implements CommandLineRunner {
                 case "9":
                     // unused privileges
                     permissionService.showUnusedPrivileges();
+                    break;
+                case "10":
+                    // unused content selectors
+                    permissionService.showUnusedContentSelectors();
                     break;
                 default:
                     log.error("Invalid option. " + MESSAGE);

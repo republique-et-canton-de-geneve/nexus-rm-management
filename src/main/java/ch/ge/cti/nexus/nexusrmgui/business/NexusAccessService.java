@@ -220,7 +220,7 @@ public class NexusAccessService {
     public List<Privilege> getPrivileges() {
         try {
             var uri = "/v1/security/privileges";
-            return Arrays.asList(Objects.requireNonNull(webClientProvider.getWebClient()
+            return List.of(Objects.requireNonNull(webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
@@ -273,20 +273,20 @@ public class NexusAccessService {
         }
     }
 
-    public void removePrivilege(String privilegeName) {
+    public List<ContentSelector> getContentSelectors() {
         try {
-            var uri = "/v1/security/privileges/" + privilegeName;
-            webClientProvider.getWebClient()
-                    .delete()
+            var uri = "/v1/security/content-selectors";
+            return List.of(Objects.requireNonNull(webClientProvider.getWebClient()
+                    .get()
                     .uri(uri)
+                    .accept(APPLICATION_JSON)
                     .header("Authorization", "Basic " + token)
                     .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-        } catch (WebClientResponseException.NotFound e) {
-            log.warn("Privilege not found: " + privilegeName);
+                    .bodyToMono(ContentSelector[].class)
+                    .block()));
         } catch (RuntimeException e) {
             handleInvocationError(e);
+            return Collections.emptyList();
         }
     }
 

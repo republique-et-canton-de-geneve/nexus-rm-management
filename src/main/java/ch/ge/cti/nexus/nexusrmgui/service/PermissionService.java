@@ -21,6 +21,7 @@ import ch.ge.cti.nexus.nexusrmgui.business.permission.Privilege;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Role;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.User;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -146,12 +147,37 @@ public class PermissionService {
                 .filter(p -> roles.stream()
                         .noneMatch(role -> role.getPrivileges().contains(p.getName())))   // = unused privilege
                 .peek(p -> {
-                        ContentSelector cs = nexusAccessService.getContentSelector(p.getContentSelector()).get();
-                        log.info("Privilege [name={}, contentSelector=[name={}, expression=[{}]]] is not used",
-                                p.getName(), cs.getName(), cs.getExpression());
+                    ContentSelector cs = nexusAccessService.getContentSelector(p.getContentSelector()).get();
+                    log.info("Privilege [name={}, contentSelector=[name={}, expression=[{}]]] is not used",
+                            p.getName(), cs.getName(), cs.getExpression());
                 })
                 .count();
         log.info("Total: {} privileges", count);
+    }
+
+    public void showUnusedContentSelectors() {
+        // get all content selectors
+        List<ContentSelector> contentSelectors = nexusAccessService.getContentSelectors();
+        Map<String, Boolean> contentSelectorUsage = contentSelectors.stream()
+                .collect(Collectors.toMap(ContentSelector::getName, x -> false));
+
+        // for every privilege, mark its content selector as used
+        nexusAccessService.getPrivileges().stream()
+                .filter(p -> StringUtils.isNotBlank(p.getContentSelector()))
+                .forEach(p -> contentSelectorUsage.put(p.getContentSelector(), true));
+
+        // discard the used content selectors
+        var unusedContentSelectors = contentSelectorUsage.entrySet().stream()
+                .filter(entry -> !entry.getValue())
+                .map(Map.Entry::getKey)
+                .sorted()
+                .toList();
+
+        // print the unused content selectors
+        unusedContentSelectors
+                .forEach(csName -> log.info("Content selector [{}] is not used", csName));
+        log.info("Number of unused content selectors: {}", unusedContentSelectors.size());
+        log.info("Total number of content selectors: {}", contentSelectors.size());
     }
 
     /**
@@ -200,7 +226,7 @@ public class PermissionService {
         var ret = new HashMap<String, Set<String>>();
         usersToRoles
                 .forEach((user, userRoles) ->
-                        userRoles.stream()
+                        userRoles
                                 .forEach(roleName -> {
                                     if (ret.get(roleName) == null) {
                                         ret.put(roleName, new HashSet<>(Arrays.asList(user)));
