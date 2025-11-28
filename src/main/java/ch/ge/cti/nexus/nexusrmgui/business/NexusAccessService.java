@@ -191,7 +191,7 @@ public class NexusAccessService {
                     .block();
         } catch (WebClientResponseException.NotFound e) {
             if (printWarningIfNotFound) {
-                log.info("Role not found: " + roleId);
+                log.info("Role not found: {} (external and not mapped in Nexus RM)", roleId);
             }
         } catch (RuntimeException e) {
             handleInvocationError(e);
