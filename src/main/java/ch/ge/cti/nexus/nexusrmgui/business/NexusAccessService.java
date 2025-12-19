@@ -33,7 +33,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 /**
  * REST requests to Nexus RM.
@@ -54,7 +53,6 @@ public class NexusAccessService {
             return webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
-                    .accept(APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(Certificate[].class)
                     .block();
@@ -74,7 +72,6 @@ public class NexusAccessService {
             return webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
-                    .accept(APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(ComponentResponse.class)
                     .block();
@@ -117,7 +114,6 @@ public class NexusAccessService {
             return Arrays.asList(Objects.requireNonNull(webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
-                    .accept(APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(User[].class)
                     .block()));
@@ -133,7 +129,6 @@ public class NexusAccessService {
             return Arrays.asList(Objects.requireNonNull(webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
-                    .accept(APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(User[].class)
                     .block()));
@@ -149,7 +144,6 @@ public class NexusAccessService {
             return Arrays.asList(Objects.requireNonNull(webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
-                    .accept(APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(Role[].class)
                     .block()));
@@ -171,7 +165,6 @@ public class NexusAccessService {
             role = webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
-                    .accept(APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(Role.class)
                     .block();
@@ -192,7 +185,6 @@ public class NexusAccessService {
             webClientProvider.getWebClient()
                     .put()
                     .uri(uri)
-                    .contentType(APPLICATION_JSON)
                     .bodyValue(role)
                     .retrieve()
                     .bodyToMono(String.class)
@@ -208,7 +200,6 @@ public class NexusAccessService {
             return List.of(Objects.requireNonNull(webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
-                    .accept(APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(Privilege[].class)
                     .block()));
@@ -226,7 +217,6 @@ public class NexusAccessService {
             privilege = webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
-                    .accept(APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(Privilege.class)
                     .block();
@@ -245,7 +235,6 @@ public class NexusAccessService {
             webClientProvider.getWebClient()
                     .post()
                     .uri(uri)
-                    .contentType(APPLICATION_JSON)
                     .bodyValue(privilege)
                     .retrieve()
                     .bodyToMono(String.class)
@@ -261,7 +250,6 @@ public class NexusAccessService {
             return List.of(Objects.requireNonNull(webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
-                    .accept(APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(ContentSelector[].class)
                     .block()));
@@ -278,7 +266,6 @@ public class NexusAccessService {
             contentSelector = webClientProvider.getWebClient()
                     .get()
                     .uri(uri)
-                    .accept(APPLICATION_JSON)
                     .retrieve()
                     .bodyToMono(ContentSelector.class)
                     .block();
