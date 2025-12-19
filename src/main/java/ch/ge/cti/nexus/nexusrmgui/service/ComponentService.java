@@ -19,7 +19,6 @@ import ch.ge.cti.nexus.nexusrmgui.business.NexusAccessService;
 import ch.ge.cti.nexus.nexusrmgui.business.component.Asset;
 import ch.ge.cti.nexus.nexusrmgui.business.component.Component;
 import ch.ge.cti.nexus.nexusrmgui.business.component.ComponentResponse;
-import ch.ge.cti.nexus.nexusrmgui.util.OutputFileUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -30,10 +29,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -45,7 +44,7 @@ import static ch.ge.cti.nexus.nexusrmgui.util.OutputFileUtils.saveWorkbook;
 @Slf4j
 public class ComponentService {
 
-    @Resource
+    @Autowired
     private NexusAccessService nexusAccessService;
 
     @Value("${app.business.component.minimum-size-file}")

@@ -22,10 +22,10 @@ import ch.ge.cti.nexus.nexusrmgui.business.permission.Privilege;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Role;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +44,7 @@ public class NexusAccessService {
     /**
      *  Provider of a WebClient (non-blocking access client) to the Nexus server.
      */
-    @Resource
+    @Autowired
     private WebClientProvider webClientProvider;
 
     public Certificate[] getCertificates() {

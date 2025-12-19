@@ -32,10 +32,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -69,7 +69,7 @@ public class PermissionService {
 
     private static final String[] COLUMNS = {"User", "Role", "Role Type", "Sub Role", "Privilege", "Repositories", "Actions", "Content Selector", "Expression"};
 
-    @Resource
+    @Autowired
     private NexusAccessService nexusAccessService;
 
     @Value("${app.security.token-base64}")

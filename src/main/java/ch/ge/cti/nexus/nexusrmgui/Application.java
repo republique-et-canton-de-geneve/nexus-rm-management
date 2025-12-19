@@ -18,8 +18,8 @@ package ch.ge.cti.nexus.nexusrmgui;
 import ch.ge.cti.nexus.nexusrmgui.service.CertificateService;
 import ch.ge.cti.nexus.nexusrmgui.service.ComponentService;
 import ch.ge.cti.nexus.nexusrmgui.service.PermissionService;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -32,13 +32,13 @@ import static java.util.Locale.ENGLISH;
 @Slf4j
 public class Application implements CommandLineRunner {
 
-    @Resource
+    @Autowired
     private CertificateService certificateService;
 
-    @Resource
+    @Autowired
     private ComponentService componentService;
 
-    @Resource
+    @Autowired
     private PermissionService permissionService;
 
     int days;

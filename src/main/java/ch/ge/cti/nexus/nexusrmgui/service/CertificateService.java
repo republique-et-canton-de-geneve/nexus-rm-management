@@ -28,9 +28,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -43,7 +43,7 @@ import static ch.ge.cti.nexus.nexusrmgui.util.OutputFileUtils.saveWorkbook;
 @Slf4j
 public class CertificateService {
 
-    @Resource
+    @Autowired
     private NexusAccessService nexusAccessService;
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
