@@ -28,9 +28,9 @@ public class Asset {
 
     private long fileSize;
 
-    //@JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonDeserialize(using = NexusServicesLocalDateTimeDeserializer.class)
     private LocalDateTime lastModified;
 
     private String path;
+
 }
