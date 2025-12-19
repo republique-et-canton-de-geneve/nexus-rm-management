@@ -22,7 +22,6 @@ import ch.ge.cti.nexus.nexusrmgui.business.permission.Privilege;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.Role;
 import ch.ge.cti.nexus.nexusrmgui.business.permission.User;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -43,12 +42,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Slf4j
 public class NexusAccessService {
 
-    private static final String ERROR_MESSAGE_404 =
-            "The Nexus server called by the application is unavailable or the URL is wrong";
-
-    @Value("${app.security.token-base64}")
-    private String token;
-
     /**
      *  Provider of a WebClient (non-blocking access client) to the Nexus server.
      */
@@ -62,7 +55,6 @@ public class NexusAccessService {
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .retrieve()
                     .bodyToMono(Certificate[].class)
                     .block();
@@ -83,7 +75,6 @@ public class NexusAccessService {
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .retrieve()
                     .bodyToMono(ComponentResponse.class)
                     .block();
@@ -99,7 +90,6 @@ public class NexusAccessService {
             webClientProvider.getWebClient()
                     .delete()
                     .uri(uri)
-                    .header("Authorization", "Basic " + token)
                     .retrieve()
                     .bodyToMono(Void.class)
                     .block();
@@ -128,7 +118,6 @@ public class NexusAccessService {
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .retrieve()
                     .bodyToMono(User[].class)
                     .block()));
@@ -145,7 +134,6 @@ public class NexusAccessService {
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .retrieve()
                     .bodyToMono(User[].class)
                     .block()));
@@ -162,7 +150,6 @@ public class NexusAccessService {
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .retrieve()
                     .bodyToMono(Role[].class)
                     .block()));
@@ -185,7 +172,6 @@ public class NexusAccessService {
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .retrieve()
                     .bodyToMono(Role.class)
                     .block();
@@ -207,7 +193,6 @@ public class NexusAccessService {
                     .put()
                     .uri(uri)
                     .contentType(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .bodyValue(role)
                     .retrieve()
                     .bodyToMono(String.class)
@@ -224,7 +209,6 @@ public class NexusAccessService {
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .retrieve()
                     .bodyToMono(Privilege[].class)
                     .block()));
@@ -243,7 +227,6 @@ public class NexusAccessService {
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .retrieve()
                     .bodyToMono(Privilege.class)
                     .block();
@@ -263,7 +246,6 @@ public class NexusAccessService {
                     .post()
                     .uri(uri)
                     .contentType(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .bodyValue(privilege)
                     .retrieve()
                     .bodyToMono(String.class)
@@ -280,7 +262,6 @@ public class NexusAccessService {
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .retrieve()
                     .bodyToMono(ContentSelector[].class)
                     .block()));
@@ -298,7 +279,6 @@ public class NexusAccessService {
                     .get()
                     .uri(uri)
                     .accept(APPLICATION_JSON)
-                    .header("Authorization", "Basic " + token)
                     .retrieve()
                     .bodyToMono(ContentSelector.class)
                     .block();

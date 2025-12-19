@@ -52,6 +52,9 @@ public class WebClientProvider {
             @Value("${app.nexus.url}")
             String nexusServicesUrl,
 
+            @Value("${app.security.token-base64}")
+            String token,
+
             @Value("${app.nexus.response-timeout-milliseconds}")
             int responseTimeout,
 
@@ -100,6 +103,7 @@ public class WebClientProvider {
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl(nexusServicesUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader("Authorization", "Basic " + token)
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10000000))
                 .build();
     }
