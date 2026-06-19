@@ -432,7 +432,6 @@ public class PermissionService {
                     createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
                     createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
                 } else {
-                    for (String action : actions) {
                         CellStyle rowStyle = (rowNum % 2 == 0) ? lightGreyStyle : whiteStyle;
                         Row row = sheet.createRow(rowNum++);
                         createCell(row, COLUMN_USER, userId, rowStyle);
@@ -444,7 +443,6 @@ public class PermissionService {
                         createCell(row, COLUMN_ACTION, actionsWithoutBrackets, rowStyle);
                         createCell(row, COLUMN_CONTENT_SELECTOR_NAME, contentSelectorName, rowStyle);
                         createCell(row, COLUMN_CONTENT_SELECTOR_EXPRESSION, expression, rowStyle);
-                    }
                 }
             }
         }
