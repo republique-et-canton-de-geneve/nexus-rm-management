@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -106,7 +107,7 @@ public class PermissionService {
     }
 
     public void showUsersHavingRole(String searchRoleName) {
-        Set<String> usersWithRole = new HashSet<>();
+        Set<String> usersWithRole = new TreeSet<>();
         Map<String, Set<String>> usersByRole = getUsersByRole();
         usersByRole.forEach((roleName, roleUsers) -> {
             if (roleName.startsWith(searchRoleName)) {
