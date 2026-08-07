@@ -8,6 +8,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  # autoriser le declenchement manuel :
+  workflow_dispatch:
  
 jobs:
   build-and-sonar:
