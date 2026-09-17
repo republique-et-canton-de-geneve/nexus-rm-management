@@ -20,6 +20,6 @@ jobs:
         java-version: '25'
         distribution: 'adopt'
     - name: Build and Sonar
-      run: mvn -B -U verify sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=etat-de-geneve-github -Dsonar.projectKey=republique-et-canton-de-geneve_nexus-rm-management-pipo
+      run: mvn -B -U verify sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=etat-de-geneve-github -Dsonar.projectKey=republique-et-canton-de-geneve_nexus-rm-management
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 

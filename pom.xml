@@ -21,7 +21,7 @@
         <!-- plugin versions -->
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <openapi-generator-maven-plugin.version>7.17.0</openapi-generator-maven-plugin.version>
-        <sonar-maven-plugin.version>5.2.0.4988</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
 
         <!-- JAR versions -->
         <gson.version>2.13.2</gson.version>
